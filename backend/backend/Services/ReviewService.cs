@@ -1,4 +1,5 @@
-﻿using backend.DTOs.Review;
+﻿using backend.DTOs.Page;
+using backend.DTOs.Review;
 using backend.Models;
 using backend.Repositories.Interfaces;
 using backend.Services.Interfaces;
@@ -8,22 +9,30 @@ namespace backend.Services
     public class ReviewService : IReviewService
     {
         private readonly IReviewRepository _repo;
+        private readonly IRestaurantRepository _restaurantRepo;
 
-
-        public ReviewService(IReviewRepository repo)
+        public ReviewService(IReviewRepository repo, IRestaurantRepository restaurantRepo)
         {
             _repo = repo;
+            _restaurantRepo = restaurantRepo;
         }
 
-        public async Task<FoodRatingSummaryDto> GetByFood(int foodId)
+        public async Task<FoodRatingSummaryDto> GetByFood(int foodId, PaginationParams pagination)
         {
             var reviews = await _repo.GetByFoodId(foodId);
+
+            var (items, totalCount) = await _repo.GetByFoodIdPaged(
+                foodId,
+                pagination.PageNumber,
+                pagination.PageSize);
+
             return new FoodRatingSummaryDto
             {
                 FoodId = foodId,
-                TotalReviews = reviews.Count,
-                AverageRating = reviews.Any() ? Math.Round(reviews.Average(x => x.Rating), 1) : 0,
-                Reviews = reviews.Select(MapToDto).ToList()
+                TotalReviews = totalCount,
+                AverageRating = reviews.Any() ? Math.Round(reviews.Average(x => x.Rating), 1): 0,
+
+                Reviews = items.Select(MapToDto).ToList()
             };
         }
 
@@ -42,18 +51,21 @@ namespace backend.Services
             var food = await _repo.GetFoodById(dto.FoodId);
             if (food == null)
             {
-                throw new Exception("Food not found.");
+                throw new ArgumentException("Food not found.");
             }
+
             var existing = await _repo.GetByUserAndFood(userId, dto.FoodId);
             if (existing != null)
             {
-                throw new Exception("You have already reviewed this food.");
+                throw new InvalidOperationException("You have already reviewed this food.");
             }
+
             var purchased = await _repo.HasUserPurchasedFood(userId, dto.FoodId);
             if (!purchased)
             {
-                throw new Exception("You can only review food you have purchased.");
+                throw new UnauthorizedAccessException("You can only review food you have purchased.");
             }
+
             var review = new Review
             {
                 UserId = userId,
@@ -62,7 +74,10 @@ namespace backend.Services
                 Comment = dto.Comment,
                 CreatedAt = DateTime.UtcNow
             };
+
             var createdReview = await _repo.Create(review);
+            await _restaurantRepo.UpdateRestaurantRatingAsync(food.RestaurantId);
+
             return MapToDto(createdReview);
         }
 
@@ -73,13 +88,23 @@ namespace backend.Services
             {
                 throw new KeyNotFoundException("Review not found.");
             }
+
             if (!isAdmin && review.UserId != currentUserId)
             {
                 throw new UnauthorizedAccessException("You are not the owner of this review.");
             }
+
             review.Rating = dto.Rating;
             review.Comment = dto.Comment;
+
             await _repo.Update(review);
+
+            var food = await _repo.GetFoodById(review.FoodId);
+            if (food != null)
+            {
+                await _restaurantRepo.UpdateRestaurantRatingAsync(food.RestaurantId);
+            }
+
             return MapToDto(review);
         }
 
@@ -90,11 +115,20 @@ namespace backend.Services
             {
                 throw new KeyNotFoundException("Review not found.");
             }
+
             if (!isAdmin && review.UserId != currentUserId)
             {
                 throw new UnauthorizedAccessException("You are not the owner of this review.");
             }
+
+            int foodId = review.FoodId;
+
             await _repo.Delete(review);
+            var food = await _repo.GetFoodById(foodId);
+            if (food != null)
+            {
+                await _restaurantRepo.UpdateRestaurantRatingAsync(food.RestaurantId);
+            }
         }
 
         private static ReviewResponseDto MapToDto(Review review)

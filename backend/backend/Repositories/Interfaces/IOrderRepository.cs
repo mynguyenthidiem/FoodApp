@@ -6,8 +6,8 @@ namespace backend.Repositories.Interfaces
     public interface IOrderRepository
     {
         // Order
-        Task<IEnumerable<Order>> GetUserOrdersAsync(int userId);
-        Task<IEnumerable<Cart>> GetSelectedCartAsync(int userId, List<int> cartIds);
+        Task<(List<Order> Items, int TotalCount)> GetUserOrdersAsync(int userId, int pageNumber, int pageSize);
+        Task<List<Cart>> GetSelectedCartAsync(int userId, List<int> cartIds);
         Task ClearSelectedCartAsync(int userId, List<int> cartIds);
         Task<Order?> GetByIdAsync(int id);
         Task CreateOrderAsync(Order order);
@@ -18,11 +18,16 @@ namespace backend.Repositories.Interfaces
         Task AddOrderDetailAsync(OrderDetail orderDetail);
 
         // Cart
-        Task<IEnumerable<Cart>> GetUserCartAsync(int userId);
+        Task<List<Cart>> GetUserCartAsync(int userId);
         Task ClearCartAsync(int userId);
 
         // Transaction
         Task SaveChangesAsync();
         Task<IDbContextTransaction> BeginTransactionAsync();
+
+        Task<Order?> GetByIdWithRestaurantAsync(int id);
+        Task<(List<Order> Items, int TotalCount)> GetRestaurantOrdersAsync(int ownerId, int pageNumber, int pageSize);
+
+        Task<(List<Order> Items, int TotalCount)> GetAllOrdersAsync(int pageNumber, int pageSize);
     }
 }

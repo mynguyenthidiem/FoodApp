@@ -1,8 +1,9 @@
 ﻿using backend.DTOs.Food;
+using backend.DTOs.Page;
 using backend.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 namespace backend.Controllers
 {
     [Authorize]
@@ -11,7 +12,14 @@ namespace backend.Controllers
     public class FoodsController : ControllerBase
     {
         private readonly IFoodService _service;
-
+        private int GetCurrentUserId()
+        {
+            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        }
+        private bool IsAdmin()
+        {
+            return User.IsInRole("Admin");
+        }
         public FoodsController(IFoodService service)
         {
             _service = service;
@@ -19,9 +27,9 @@ namespace backend.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] PaginationParams pagination)
         {
-            var foods = await _service.GetAllAsync();
+            var foods = await _service.GetAllAsync(pagination);
             return Ok(foods);
         }
 
@@ -32,35 +40,40 @@ namespace backend.Controllers
             try
             {
                 var food = await _service.GetByIdAsync(id);
+
                 return Ok(food);
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
         [AllowAnonymous]
         [HttpGet("category/{id}")]
-        public async Task<IActionResult> GetByCategory(int id)
+        public async Task<IActionResult> GetByCategory(int id, [FromQuery] PaginationParams pagination)
         {
-            var foods = await _service.GetByCategoryAsync(id);
+            var foods = await _service.GetByCategoryAsync(id, pagination);
             return Ok(foods);
         }
 
         [AllowAnonymous]
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string keyword)
+        public async Task<IActionResult> Search([FromQuery] string keyword, [FromQuery] PaginationParams pagination)
         {
             if (string.IsNullOrWhiteSpace(keyword))
             {
                 return BadRequest(new { message = "Keyword is required." });
             }
-            var foods = await _service.SearchAsync(keyword);
+            var foods = await _service.SearchAsync(keyword, pagination);
             return Ok(foods);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Owner, Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] CreateFoodDto dto)
         {
@@ -69,16 +82,31 @@ namespace backend.Controllers
 
             try
             {
-                var food = await _service.CreateAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = food.Id }, food);
+                var food = await _service.CreateAsync(GetCurrentUserId(), IsAdmin(), dto);
+
+                return CreatedAtAction(nameof(GetById),
+                    new { id = food.Id },
+                    food);
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Owner, Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateFoodDto dto)
         {
@@ -87,39 +115,53 @@ namespace backend.Controllers
 
             try
             {
-                var result = await _service.UpdateAsync(id, dto);
-                if (!result)
+                await _service.UpdateAsync(id, GetCurrentUserId(), IsAdmin(), dto);
+
+                return Ok(new
                 {
-                    return NotFound(new { message = "Food not found." });
-                }
-                return Ok(new { message = "Food updated successfully." });
+                    message = "Food updated successfully."
+                });
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Owner, Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var result = await _service.DeleteAsync(id);
-                if (!result)
-                {
-                    return NotFound(new { message = "Food not found." });
-                }
-                return Ok(new { message = "Food deleted successfully." });
+
+                await _service.DeleteAsync(id, GetCurrentUserId(), IsAdmin());
+
+                return NoContent();
             }
-            catch (DbUpdateException)
+            catch (KeyNotFoundException ex)
             {
-                return Conflict(new { message = "Cannot delete food because it exists in cart or order." });
+                return NotFound(new { message = ex.Message });
             }
-            catch (Exception ex)
+            catch (UnauthorizedAccessException)
             {
-                return BadRequest(new { message = ex.Message });
+                return Forbid();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }

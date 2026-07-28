@@ -1,4 +1,5 @@
-﻿using backend.DTOs.Review;
+﻿using backend.DTOs.Page;
+using backend.DTOs.Review;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,18 +32,25 @@ namespace backend.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var review = await _service.GetById(id);
-            if (review == null)
+            try
             {
-                return NotFound(new { message = "Review not found." });
+                var review = await _service.GetById(id);
+                return Ok(review);
             }
-            return Ok(review);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         [HttpGet("food/{foodId}")]
-        public async Task<IActionResult> GetByFood(int foodId)
+        public async Task<IActionResult> GetByFood(int foodId, [FromQuery] PaginationParams pagination)
         {
-            var result = await _service.GetByFood(foodId);
+            var result = await _service.GetByFood(foodId, pagination);
             return Ok(result);
         }
 
@@ -56,11 +64,26 @@ namespace backend.Controllers
             try
             {
                 var created = await _service.Create(GetCurrentUserId(), dto);
-                return CreatedAtAction(nameof(GetById), new { id = created!.Id }, created);
+
+                return CreatedAtAction(nameof(GetById),
+                    new { id = created!.Id },
+                    created);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -86,7 +109,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -106,9 +129,9 @@ namespace backend.Controllers
             {
                 return Forbid();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }
