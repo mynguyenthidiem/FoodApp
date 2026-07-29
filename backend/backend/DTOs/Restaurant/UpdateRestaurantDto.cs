@@ -21,9 +21,9 @@ namespace backend.DTOs.Restaurant
 
         public string? Description { get; set; }
 
-        public DateTime OpenTime { get; set; }
+        public TimeOnly OpenTime { get; set; }
 
-        public DateTime CloseTime { get; set; }
+        public TimeOnly CloseTime { get; set; }
 
         [Range(0, 1000000)]
         public decimal DeliveryFee { get; set; }

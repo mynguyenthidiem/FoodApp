@@ -29,9 +29,9 @@ namespace backend.Repositories
         public async Task<Payment?> GetPaymentWithOrderAsync(int orderId)
         {
             return await _context.Payments
-                .Include(p => p.Order)
+                .Include(p => p.Order!)
                     .ThenInclude(o => o.Restaurant)
-                .Include(p => p.Order)
+                .Include(p => p.Order!)
                     .ThenInclude(o => o.User) 
                 .FirstOrDefaultAsync(p => p.OrderId == orderId);
         }
