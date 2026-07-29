@@ -4,7 +4,7 @@ namespace backend.Repositories.Interfaces
 {
     public interface ICartRepository
     {
-        Task<IEnumerable<Cart>> GetUserCartAsync(int userId);
+        Task<List<Cart>> GetUserCartAsync(int userId);
 
         Task<Cart?> GetByIdAsync(int id);
 

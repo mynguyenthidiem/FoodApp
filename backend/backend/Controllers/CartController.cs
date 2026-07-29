@@ -96,7 +96,7 @@ namespace backend.Controllers
             {
                 return Forbid();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
@@ -111,7 +111,7 @@ namespace backend.Controllers
 
                 return Ok(new { message = "Cart cleared successfully." });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }

@@ -14,7 +14,7 @@ namespace backend.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Category>> GetAllAsync()
+        public async Task<List<Category>> GetAllAsync()
         {
             return await _context.Categories
                 .Include(c => c.Restaurant)

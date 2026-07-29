@@ -14,7 +14,7 @@ namespace backend.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<SystemCategory>> GetAllAsync()
+        public async Task<List<SystemCategory>> GetAllAsync()
         {
             return await _context.SystemCategories
                 .Where(sc => sc.IsActive)

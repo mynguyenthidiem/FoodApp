@@ -107,7 +107,7 @@ namespace backend.Controllers
             {
                 return Forbid();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }

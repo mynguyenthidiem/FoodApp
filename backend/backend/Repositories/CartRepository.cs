@@ -15,7 +15,7 @@ namespace backend.Repositories
         }
 
         // Lấy toàn bộ giỏ hàng của User
-        public async Task<IEnumerable<Cart>> GetUserCartAsync(int userId)
+        public async Task<List<Cart>> GetUserCartAsync(int userId)
         {
             return await _context.Carts
                 .Include(c => c.Food)
