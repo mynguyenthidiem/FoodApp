@@ -21,7 +21,7 @@ namespace backend.Models
 
         public bool IsActive { get; set; } = true;
 
-        [StringLength(20)]
+        [StringLength(200)]
         public string? Address { get; set; }
 
         public string? Avatar { get; set; }

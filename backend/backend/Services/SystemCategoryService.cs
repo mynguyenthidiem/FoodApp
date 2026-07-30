@@ -17,10 +17,10 @@ namespace backend.Services
             _urlService = urlService;
         }
 
-        public async Task<IEnumerable<SystemCategoryDto>> GetAllAsync()
+        public async Task<List<SystemCategoryDto>> GetAllAsync()
         {
             var categories = await _repository.GetAllAsync();
-            return categories.Select(MapToDto);
+            return categories.Select(MapToDto).ToList();
         }
 
         public async Task<SystemCategoryDto?> GetByIdAsync(int id)

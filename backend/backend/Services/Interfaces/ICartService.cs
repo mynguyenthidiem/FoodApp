@@ -4,7 +4,7 @@ namespace backend.Services.Interfaces
 {
     public interface ICartService
     {
-        Task<IEnumerable<CartDto>> GetCartAsync(int userId);
+        Task<List<CartDto>> GetCartAsync(int userId);
 
         Task<CartDto> AddToCartAsync(int userId, AddCartDto dto);
 

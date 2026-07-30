@@ -20,3 +20,5 @@ appsettings.Development.json
 
 # Archives
 *.zip
+
+firebase-service-account.json

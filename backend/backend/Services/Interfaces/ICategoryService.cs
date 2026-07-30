@@ -4,7 +4,7 @@ namespace backend.Services.Interfaces
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<CategoryDto>> GetAllAsync();
+        Task<List<CategoryDto>> GetAllAsync();
 
         Task<CategoryDto?> GetByIdAsync(int id);
 

@@ -71,9 +71,9 @@ namespace backend.Services
 
                 int restaurantId = restaurant.Id;
 
-                var now = DateTime.Now.TimeOfDay;
+                var now = TimeOnly.FromDateTime(DateTime.Now);
 
-                if (DateTime.UtcNow < restaurant.OpenTime || DateTime.UtcNow > restaurant.CloseTime)
+                if (now < restaurant.OpenTime || now > restaurant.CloseTime)
                 {
                     throw new InvalidOperationException("Restaurant is currently closed.");
                 }

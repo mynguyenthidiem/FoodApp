@@ -14,10 +14,10 @@ namespace backend.Services
             _repository = repository;
         }
 
-        public async Task<IEnumerable<CartDto>> GetCartAsync(int userId)
+        public async Task<List<CartDto>> GetCartAsync(int userId)
         {
             var carts = await _repository.GetUserCartAsync(userId);
-            return carts.Select(MapToDto);
+            return carts.Select(MapToDto).ToList();
         }
         public async Task<CartDto> AddToCartAsync(int userId, AddCartDto dto)
         {

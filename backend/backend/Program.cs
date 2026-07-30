@@ -4,14 +4,28 @@ using backend.Repositories;
 using backend.Repositories.Interfaces;
 using backend.Services;
 using backend.Services.Interfaces;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+
 var builder = WebApplication.CreateBuilder(args);
 
+
+var credentialPath = Path.Combine(builder.Environment.ContentRootPath, "firebase-service-account.json");
+
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = CredentialFactory
+        .FromFile<ServiceAccountCredential>(credentialPath)
+        .ToGoogleCredential()
+});
 // Đăng Ký DB Context
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
@@ -54,7 +68,7 @@ builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IUrlService, UrlService>();
-builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -108,104 +122,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+// Đăng ký CORS - cho phép frontend (Expo/React Native) gọi API
+// Lưu ý: giai đoạn dev dùng AllowAnyOrigin, khi lên production nên
+// thay bằng .WithOrigins("https://your-frontend-domain.com") cụ thể.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    if (!context.Roles.Any())
-    {
-        context.Roles.AddRange(
-            new Role { Name = "Admin" },
-            new Role { Name = "Owner" },
-            new Role { Name = "Customer" }
-        );
-
-        context.SaveChanges();
-    }
-    if (!context.Users.Any())
-    {
-        context.Users.AddRange(
-            new User
-            {
-                FullName = "Admin",
-                Email = "admin@gmail.com",
-                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
-                IsActive = true
-            },
-            new User
-            {
-                FullName = "Restaurant Owner",
-                Email = "owner@gmail.com",
-                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
-                IsActive = true
-            },
-            new User
-            {
-                FullName = "Customer",
-                Email = "customer@gmail.com",
-                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
-                IsActive = true
-            }
-        );
-
-        context.SaveChanges();
-    }
-    if (!context.UserRoles.Any())
-    {
-        var admin = context.Users.First(x => x.Email == "admin@gmail.com");
-        var owner = context.Users.First(x => x.Email == "owner@gmail.com");
-        var customer = context.Users.First(x => x.Email == "customer@gmail.com");
-
-        var adminRole = context.Roles.First(x => x.Name == "Admin");
-        var ownerRole = context.Roles.First(x => x.Name == "Owner");
-        var customerRole = context.Roles.First(x => x.Name == "Customer");
-
-        context.UserRoles.AddRange(
-            new UserRole
-            {
-                UserId = admin.Id,
-                RoleId = adminRole.Id
-            },
-            new UserRole
-            {
-                UserId = owner.Id,
-                RoleId = ownerRole.Id
-            },
-            new UserRole
-            {
-                UserId = customer.Id,
-                RoleId = customerRole.Id
-            }
-        );
-
-        context.SaveChanges();
-    }
-    if (!context.Restaurants.Any())
-    {
-        var owner = context.Users.First(x => x.Email == "owner@gmail.com");
-
-        context.Restaurants.AddRange(
-            new Restaurant
-            {
-                Name = "Pizza House",
-                Address = "Thu Dau Mot",
-                Description = "Italian Pizza",
-                OwnerId = owner.Id,
-                IsActive = true
-            },
-            new Restaurant
-            {
-                Name = "KFC",
-                Address = "Binh Duong",
-                Description = "Fast Food",
-                OwnerId = owner.Id,
-                IsActive = true
-            }
-        );
-
-        context.SaveChanges();
-    }
+    // Tự động áp dụng migration (tạo bảng nếu chưa có) trước khi seed dữ liệu
+    await context.Database.MigrateAsync();
+    // Seed đầy đủ: 3 role, user mẫu (admin/owner x8/customer), 8 nhà hàng,
+    // 11 danh mục hệ thống, 65 món ăn — dữ liệu lấy từ project/project/data/*.js
+    await DataSeeder.SeedAsync(context);
 }
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -216,6 +155,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+// CORS phải đứng trước Authentication/Authorization
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 
 app.UseAuthorization();

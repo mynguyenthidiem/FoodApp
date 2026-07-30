@@ -4,7 +4,7 @@ namespace backend.Repositories.Interfaces
 {
     public interface ICategoryRepository
     {
-        Task<IEnumerable<Category>> GetAllAsync();
+        Task<List<Category>> GetAllAsync();
 
         Task<Category?> GetByIdAsync(int id);
 
