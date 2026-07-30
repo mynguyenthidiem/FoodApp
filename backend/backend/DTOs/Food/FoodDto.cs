@@ -19,6 +19,8 @@ namespace backend.DTOs.Food
         public int CategoryId { get; set; }
 
         public string? CategoryName { get; set; }
+        public int RestaurantId { get; set; }
+        public string? RestaurantName { get; set; }
 
         public DateTime CreatedAt { get; set; }
     }

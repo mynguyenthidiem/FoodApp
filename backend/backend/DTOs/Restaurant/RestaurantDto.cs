@@ -17,5 +17,8 @@
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public int OwnerId { get; set; }
+        public int FoodCount { get; set; }
+        public int CategoryCount { get; set; }
+        public List<string> Categories { get; set; } = new();
     }
 }

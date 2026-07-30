@@ -101,6 +101,27 @@ namespace backend.Repositories
             return (items, totalCount);
         }
 
+        public async Task<(List<Food> Items, int TotalCount)> GetByRestaurantAsync( int restaurantId, int pageNumber, int pageSize)
+        {
+            var query = _context.Foods
+                .Include(f => f.Category)
+                    .ThenInclude(c => c.SystemCategory)
+                .Include(f => f.Restaurant)
+                .Where(f =>
+                    f.RestaurantId == restaurantId &&
+                    f.Status == FoodStatus.Available)
+                .AsNoTracking();
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(f => f.Name)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
 
         public async Task<(List<Food> Items, int TotalCount)> SearchAsync(string keyword, int pageNumber, int pageSize)
         {

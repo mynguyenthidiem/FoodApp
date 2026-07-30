@@ -48,6 +48,20 @@ namespace backend.Services
             return new PagedResultDto<FoodDto>(items.Select(MapToDto).ToList(), totalCount, pagination.PageNumber, pagination.PageSize);
         }
 
+        public async Task<PagedResultDto<FoodDto>> GetByRestaurantAsync(int restaurantId, PaginationParams pagination)
+        {
+            var (items, totalCount) =
+                await _repository.GetByRestaurantAsync(
+                    restaurantId,
+                    pagination.PageNumber,
+                    pagination.PageSize);
+
+            return new PagedResultDto<FoodDto>(
+                items.Select(MapToDto).ToList(),
+                totalCount,
+                pagination.PageNumber,
+                pagination.PageSize);
+        }
         public async Task<PagedResultDto<FoodDto>> SearchAsync(string keyword, PaginationParams pagination)
         {
             var (items, totalCount) = await _repository.SearchAsync(keyword, pagination.PageNumber, pagination.PageSize);
@@ -175,6 +189,8 @@ namespace backend.Services
                 Status = food.Status,
                 CategoryId = food.CategoryId,
                 CategoryName = food.Category?.SystemCategory?.Name,
+                RestaurantId = food.RestaurantId,
+                RestaurantName = food.Restaurant?.Name,
                 CreatedAt = food.CreatedAt
             };
         }

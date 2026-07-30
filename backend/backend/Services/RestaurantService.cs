@@ -146,7 +146,14 @@ namespace backend.Services
                 TotalReviews = restaurant.TotalReviews,
                 IsActive = restaurant.IsActive,
                 CreatedAt = restaurant.CreatedAt,
-                OwnerId = restaurant.OwnerId
+                OwnerId = restaurant.OwnerId,
+                FoodCount = restaurant.Foods.Count(f => f.Status == FoodStatus.Available),
+                CategoryCount = restaurant.Categories.Count,
+                Categories = restaurant.Categories
+                    .Select(c => c.SystemCategory!.Name)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList()
             };
         }
     }
