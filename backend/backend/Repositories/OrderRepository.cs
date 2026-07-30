@@ -60,6 +60,7 @@ namespace backend.Repositories
         {
             return await _context.Orders
                 .Include(o => o.Restaurant)
+                .Include(o=>o.Payment)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(d => d.Food)
                 .FirstOrDefaultAsync(o => o.Id == id);

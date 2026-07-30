@@ -4,14 +4,28 @@ using backend.Repositories;
 using backend.Repositories.Interfaces;
 using backend.Services;
 using backend.Services.Interfaces;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+
 var builder = WebApplication.CreateBuilder(args);
 
+
+var credentialPath = Path.Combine(builder.Environment.ContentRootPath, "firebase-service-account.json");
+
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = CredentialFactory
+        .FromFile<ServiceAccountCredential>(credentialPath)
+        .ToGoogleCredential()
+});
 // Đăng Ký DB Context
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(

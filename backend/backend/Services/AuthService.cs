@@ -2,6 +2,7 @@
 using backend.Models;
 using backend.Repositories.Interfaces;
 using backend.Services.Interfaces;
+using FirebaseAdmin.Auth;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -26,6 +27,7 @@ namespace backend.Services
             {
                 throw new InvalidOperationException("Email already exists.");
             }
+
             var user = new User
             {
                 FullName = dto.FullName,
@@ -69,13 +71,86 @@ namespace backend.Services
             bool passwordCorrect = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
             if (!passwordCorrect)
             {
-                throw new Exception("Email or password is incorrect.");
+                throw new UnauthorizedAccessException("Invalid email or password");
             }
             var token = GenerateToken(user);
             return new AuthResponseDto
             {
                 Success = true,
                 Message = "Log in successful.",
+                Token = token,
+                User = MapUser(user)
+            };
+        }
+
+        public async Task<AuthResponseDto> LoginWithGoogle(GoogleLoginDto dto)
+        {
+            // Verify Firebase ID Token
+            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(dto.IdToken);
+
+            // Lấy email
+            decodedToken.Claims.TryGetValue("email", out var emailObj);
+            var email = emailObj?.ToString();
+
+            if (string.IsNullOrEmpty(email))
+            {
+                throw new UnauthorizedAccessException("Invalid Google account.");
+            }
+
+            // Tìm user
+            var user = await _repo.GetByEmail(email);
+
+            // Nếu chưa có thì tạo mới
+            if (user == null)
+            {
+                decodedToken.Claims.TryGetValue("name", out var nameObj);
+
+                user = new User
+                {
+                    Email = email,
+                    FullName = nameObj?.ToString() ?? "",
+                    Password = "", // Tài khoản Google không dùng password
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                // Lưu user
+                user = await _repo.Create(user);
+
+                // Gán role Customer
+                var role = await _repo.GetRoleByName("Customer");
+
+                if (role != null)
+                {
+                    await _repo.CreateUserRole(new UserRole
+                    {
+                        UserId = user.Id,
+                        RoleId = role.Id
+                    });
+                }
+
+                // Load lại để có UserRoles
+                user = await _repo.GetByEmail(email);
+
+                if (user == null)
+                {
+                    throw new InvalidOperationException("Failed to load Google user.");
+                }
+            }
+
+            // Kiểm tra tài khoản
+            if (!user.IsActive)
+            {
+                throw new InvalidOperationException("Account has been locked.");
+            }
+
+            // Sinh JWT
+            var token = GenerateToken(user);
+
+            return new AuthResponseDto
+            {
+                Success = true,
+                Message = "Google login successful.",
                 Token = token,
                 User = MapUser(user)
             };
@@ -90,7 +165,7 @@ namespace backend.Services
             }
             if (!user.IsActive)
             {
-                throw new Exception("Your account has been locked.");
+                throw new UnauthorizedAccessException("Your account has been locked.");
             }
             return MapUser(user);
         }
@@ -101,6 +176,10 @@ namespace backend.Services
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found.");
+            }
+            if (dto.OldPassword == dto.NewPassword)
+            {
+                throw new InvalidOperationException("New password must be different.");
             }
             bool oldPasswordCorrect = BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.Password);
             if (!oldPasswordCorrect)
