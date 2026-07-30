@@ -12,6 +12,7 @@ namespace backend.Repositories.Interfaces
         Task<(List<Food> Items,  int TotalCount)> GetByCategoryAsync(int categoryId, int pageNumber, int pageSize);
 
         Task<(List<Food> Items, int TotalCount)> GetBySystemCategoryAsync(int systemCategoryId, int pageNumber, int PageSize);
+        Task<(List<Food> Items, int TotalCount)> GetByRestaurantAsync( int restaurantId, int pageNumber, int pageSize);
         Task<(List<Food> Items, int TotalCount)> SearchAsync(string keyword, int pageNumber, int pageSize);
 
         Task CreateAsync(Food food);

@@ -14,24 +14,37 @@ namespace backend.Repositories
             _context = context;
         }
 
-        public async Task<(List<Restaurant> Items, int TotalCount)> GetAll(int pageNumber, int pageSize)
+        public async Task<(List<Restaurant> Items, int TotalCount)> GetAll(int pageNumber,int pageSize)
         {
             var query = _context.Restaurants
                 .Where(r => r.IsActive)
+
+                .Include(r => r.Foods
+                    .Where(f => f.Status == FoodStatus.Available))
+
+                .Include(r => r.Categories
+                    .Where(c => c.IsActive))
+                    .ThenInclude(c => c.SystemCategory)
+
                 .OrderByDescending(r => r.Rating)
                 .AsNoTracking();
+
             var totalCount = await query.CountAsync();
-            var items = await query.Skip((pageNumber - 1) * pageSize)
-                                    .Take(pageSize)
-                                    .ToListAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
             return (items, totalCount);
         }
 
         public async Task<Restaurant?> GetById(int id)
         {
             return await _context.Restaurants
-                .Include(r => r.Categories.Where(c => c.IsActive)) 
-                .Include(r => r.Foods.Where(f => f.Status == FoodStatus.Available)) 
+                .Include(r => r.Categories.Where(c => c.IsActive)).ThenInclude(c => c.SystemCategory)
+                .Include(r => r.Foods.Where(f => f.Status == FoodStatus.Available)).ThenInclude(f => f.Category).ThenInclude(c => c.SystemCategory)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.Id == id && r.IsActive);
         }
 

@@ -12,6 +12,7 @@ namespace backend.Services.Interfaces
 
         Task<PagedResultDto<FoodDto>> GetByCategoryAsync(int categoryId, PaginationParams pagination);
         Task<PagedResultDto<FoodDto>> GetBySystemCategoryAsync(int systemCategoryId, PaginationParams pagination);
+        Task<PagedResultDto<FoodDto>> GetByRestaurantAsync(int restaurantId, PaginationParams pagination);
         Task<PagedResultDto<FoodDto>> SearchAsync(string keyword, PaginationParams pagination);
 
         Task<FoodDto> CreateAsync(int currentUserId, bool isAdmin, CreateFoodDto dto);

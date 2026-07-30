@@ -62,6 +62,14 @@ namespace backend.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("restaurant/{restaurantId}")]
+        public async Task<IActionResult> GetByRestaurant( int restaurantId, [FromQuery] PaginationParams pagination)
+        {
+            var foods = await _service.GetByRestaurantAsync(restaurantId, pagination);
+            return Ok(foods);
+        }
+
+        [AllowAnonymous]
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string keyword, [FromQuery] PaginationParams pagination)
         {
