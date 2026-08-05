@@ -29,6 +29,7 @@ namespace backend.Controllers
             _service = service;
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -46,7 +47,7 @@ namespace backend.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-
+        [AllowAnonymous]
         [HttpGet("food/{foodId}")]
         public async Task<IActionResult> GetByFood(int foodId, [FromQuery] PaginationParams pagination)
         {

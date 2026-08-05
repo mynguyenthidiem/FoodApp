@@ -64,6 +64,10 @@ namespace backend.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
@@ -88,15 +92,17 @@ namespace backend.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
-        [Authorize(Roles = "Admin, Owner" +
-            "" +
-            "")]
+        [Authorize(Roles = "Admin, Owner")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -109,6 +115,10 @@ namespace backend.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
             }
             catch (Exception)
             {
