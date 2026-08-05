@@ -1,9 +1,6 @@
 import api from "./client";
 
-// ==============================
-// GET ALL FOODS
-// ==============================
-
+// GET /api/Foods
 export const getFoods = async (
   pageNumber = 1,
   pageSize = 20
@@ -18,22 +15,14 @@ export const getFoods = async (
   return response.data;
 };
 
-// ==============================
-// GET FOOD BY ID
-// ==============================
-
+// GET /api/Foods/{id}
 export const getFoodById = async (id) => {
-  const response = await api.get(
-    `/Foods/${id}`
-  );
+  const response = await api.get(`/Foods/${id}`);
 
   return response.data;
 };
 
-// ==============================
-// GET FOODS BY CATEGORY
-// ==============================
-
+// GET /api/Foods/category/{id}
 export const getFoodsByCategory = async (
   categoryId,
   pageNumber = 1,
@@ -52,32 +41,7 @@ export const getFoodsByCategory = async (
   return response.data;
 };
 
-// ==============================
-// GET FOODS BY RESTAURANT
-// ==============================
-
-export const getFoodsByRestaurant = async (
-  restaurantId,
-  pageNumber = 1,
-  pageSize = 20
-) => {
-  const response = await api.get(
-    `/Foods/restaurant/${restaurantId}`,
-    {
-      params: {
-        pageNumber,
-        pageSize,
-      },
-    }
-  );
-
-  return response.data;
-};
-
-// ==============================
-// SEARCH FOODS
-// ==============================
-
+// GET /api/Foods/search
 export const searchFoods = async (
   keyword,
   pageNumber = 1,

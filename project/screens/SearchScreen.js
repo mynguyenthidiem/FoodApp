@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import FoodCard from "../components/FoodCard";
 import { useDispatch, useSelector } from "react-redux";
 
 import { fetchRestaurants } from "../store/restaurantSlice";
-import { fetchFoods } from "../store/foodSlice";
+import { fetchFoods, fetchSearchFoods, clearSearchResults } from "../store/foodSlice";
 import { toggleFavorite } from "../store/favoriteSlice";
 
 export default function SearchScreen({
@@ -29,8 +29,7 @@ export default function SearchScreen({
   const filterChips = [
     "All",
     "Top Rated",
-    "Open Now",
-    "Vegan",
+    "Open",
   ];
 
   const [keyword, setKeyword] = useState("");
@@ -41,11 +40,14 @@ export default function SearchScreen({
   const {
     items: restaurants,
     status: restaurantStatus,
+    error: restaurantError,
   } = useSelector((state) => state.restaurant);
 
   const {
     items: foods,
+    searchResults,
     status: foodStatus,
+    error: foodError,
   } = useSelector((state) => state.food);
 
   const favoriteIds = useSelector(
@@ -56,101 +58,92 @@ export default function SearchScreen({
   };
   
   const suggestedRestaurants =
-    restaurants.slice(0, 2);
+useMemo(
+    () => restaurants.slice(0,3),
+    [restaurants]
+);
 
-  const suggestedFoods =
-    foods.slice(0, 6);
+const suggestedFoods =
+useMemo(
+    () => foods.slice(0,8),
+    [foods]
+);
   
-    const filteredRestaurants =
-    useMemo(() => {
-      let data = [...restaurants];
+const filteredRestaurants = useMemo(() => {
+  let data = [...restaurants];
 
-      if (keyword.trim()) {
-        const search =
-          keyword.toLowerCase();
+  if (keyword.trim()) {
+    const search = keyword.toLowerCase();
 
-        data = data.filter(
-          (restaurant) =>
-            restaurant.name
-              .toLowerCase()
-              .includes(search) ||
-            restaurant.address
-              ?.toLowerCase()
-              .includes(search) ||
-            restaurant.description
-              ?.toLowerCase()
-              .includes(search) ||
-            restaurant.categories.some(
-              (category) =>
-                category
-                  .toLowerCase()
-                  .includes(search)
-            )
+    data = data.filter((restaurant) =>{
+        const categories= restaurant.categories ?? [];
+        return (
+          restaurant.name
+            ?.toLowerCase()
+            .includes(search) ||
+          restaurant.address
+            ?.toLowerCase()
+            .includes(search) ||
+          restaurant.description
+            ?.toLowerCase()
+            .includes(search) ||
+          categories.some((category) =>
+              category
+                .toLowerCase()
+                .includes(search)
+          )
         );
-      }
+  });
+}
 
-      switch (selectedFilter) {
-        case "Top Rated":
-          data = data.filter(
-            (restaurant) =>
-              restaurant.rating >= 4.7
-          );
-          break;
+  switch (selectedFilter) {
+    case "Top Rated":
+      data = data.filter(
+        (restaurant) => restaurant.rating >= 4.5
+      );
+      break;
 
-        case "Open Now":
-          data = data.filter(
-            (restaurant) =>
-              restaurant.isActive
-          );
-          break;
+    case "Open":
+      data = data.filter(
+        (restaurant) => restaurant.isActive
+      );
+      break;
+    default:
+      break;
+  }
 
-        case "Vegan":
-          data = data.filter(
-            (restaurant) =>
-              restaurant.categories.some((c) => c.toLowerCase() === "vegan")              
-          );
-          break;
-
-        default:
-          break;
-      }
-
-      return data;
-    }, [keyword, selectedFilter]);
-    const filteredFoods = useMemo(() => {
-    if (!keyword.trim()) {
-      return suggestedFoods;
-    }
-
-    const search =
-      keyword.toLowerCase();
-
-    return foods.filter(
-      (food) =>
-        food.name
-          .toLowerCase()
-          .includes(search) ||
-        food.description
-          ?.toLowerCase()
-          .includes(search) ||
-        food.categoryName
-          ?.toLowerCase()
-          .includes(search) ||
-        food.restaurantName
-          ?.toLowerCase()
-          .includes(search)
-    );
-  }, [keyword]);
-
+  return data;
+}, [restaurants, keyword, selectedFilter]);
+    
   useEffect(() => {
-    dispatch(fetchRestaurants());
-    dispatch(fetchFoods());
+    dispatch(fetchRestaurants({
+              pageNumber: 1,
+              pageSize: 20,
+    }));
+    dispatch(fetchFoods({    
+              pageNumber: 1,
+              pageSize: 20,
+    }));
   }, [dispatch]);
 
-  if (
-  restaurantStatus === "loading" ||
-  foodStatus === "loading"
-) {
+  useEffect(() => {
+    const text = keyword.trim();
+    if(!text) {
+      dispatch(clearSearchResults());
+      return;
+    }
+    const timer = setTimeout(() => {
+      dispatch(fetchSearchFoods({
+        keyword: text,
+        pageNumber: 1,
+        pageSize: 20,
+      }));
+    },400);
+    return () => clearTimeout(timer);
+  }, [ dispatch, keyword,
+  ]);
+
+  if ( (restaurantStatus === "loading" && restaurants.length===0) ||(foodStatus === "loading" && foods.length===0)) {
   return (
     <SafeAreaView style={commonStyles.screen}>
       <View
@@ -164,12 +157,10 @@ export default function SearchScreen({
           color={COLORS.primary}
         />
 
-        <Text
-          style={{
-            marginTop: 12,
-          }}
-        >
-          Loading...
+        <Text style={{marginTop: 12,}}>
+          {
+            keyword.trim() ? "Searching..." : "Loading..."
+          }
         </Text>
       </View>
     </SafeAreaView>
@@ -188,7 +179,7 @@ export default function SearchScreen({
           ]}
         >
           <Text>
-            Failed to load data.
+            {restaurantError || foodError || "Failed to load data."}
           </Text>
         </View>
       </SafeAreaView>
@@ -203,7 +194,6 @@ export default function SearchScreen({
         }
       >
         <HomeHeader
-          {...homeHeader}
           onNotificationPress={() => {}}
           onProfilePress={() =>
             navigation.navigate("Profile")
@@ -235,45 +225,7 @@ export default function SearchScreen({
           </ScrollView>
         </View>
         {!keyword.trim() && (
-          <>
-            <View
-              style={
-                homeStyles.searchSectionHeader
-              }
-            >
-              <Text
-                style={
-                  homeStyles.sectionTitle
-                }
-              >
-                Recent Searches
-              </Text>
-
-              <Text
-                style={
-                  homeStyles.clearText
-                }
-              >
-                Clear All
-              </Text>
-            </View>
-
-            <View
-              style={
-                homeStyles.recentContainer
-              }
-            >
-              {recentSearches.map((item) => (
-                <FilterChip
-                  key={item}
-                  title={item}
-                  onPress={() =>
-                    setKeyword(item)
-                  }
-                />
-              ))}
-            </View>
-
+          <>            
             <Text
               style={[
                 homeStyles.sectionTitle,
@@ -283,7 +235,7 @@ export default function SearchScreen({
                 },
               ]}
             >
-              Suggested Restaurants
+              Restaurants
             </Text>
 
             {suggestedRestaurants.map(
@@ -316,40 +268,32 @@ export default function SearchScreen({
               )
             )}
 
-            <Text
-              style={[
-                homeStyles.sectionTitle,
+            <Text style={[ homeStyles.sectionTitle,
                 {
                   marginTop: 24,
                   marginBottom: 16,
                 },
               ]}
             >
-              Popular Dishes
+              Explore Foods
             </Text>
 
             <ScrollView
               horizontal
-              showsHorizontalScrollIndicator={
-                false
-              }
+              showsHorizontalScrollIndicator={ false}
             >
               {suggestedFoods.map((food) => (
                 <FoodCard
                   key={food.id}
-                  item={{
-                    ...food,
-                    favorite: false,
-                  }}
-                  onFavoritePress={(item) => dispatch(toggleFavorite(item.id))}
-                  onPress={() =>
-                    navigation.navigate(
-                      "FoodDetail",
+                  item={{...food,
+                    favorite: favoriteIds.includes(food.id)}}                 
+                  onPress={() => navigation.navigate("FoodDetail",
                       {
-                        food,
+                          foodId: food.id,
                       }
                     )
                   }
+                  onFavoritePress={handleFavorite}
                 />
               ))}
             </ScrollView>
@@ -358,9 +302,7 @@ export default function SearchScreen({
 
         {keyword.trim() && (
           <>
-            <Text
-              style={[
-                homeStyles.sectionTitle,
+            <Text style={[ homeStyles.sectionTitle,
                 {
                   marginTop: 24,
                   marginBottom: 16,
@@ -429,14 +371,13 @@ export default function SearchScreen({
               Dishes
             </Text>
 
-            {filteredFoods.length ===
-            0 ? (
+            {searchResults.length === 0 ? (
               <Text
                 style={
                   homeStyles.emptySearchText
                 }
               >
-                No dishes found.
+                No matching foods found.
               </Text>
             ) : (
               <ScrollView
@@ -445,14 +386,11 @@ export default function SearchScreen({
                   false
                 }
               >
-                {filteredFoods.map(
+                {searchResults.map(
                   (food) => (
                     <FoodCard
                       key={food.id}
-                      item={{
-                        ...food,
-                        favorite: favoriteIds.includes(food.id)
-                      }}
+                      item={{...food, favorite: favoriteIds.includes(food.id)}}
                       onFavoritePress={handleFavorite}
                       onPress={() =>
                         navigation.navigate(

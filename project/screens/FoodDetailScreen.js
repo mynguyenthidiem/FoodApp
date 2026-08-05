@@ -1,86 +1,105 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   View,
   Text,
   Image,
   ScrollView,
   TouchableOpacity,
-} from "react-native";
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
-import { SafeAreaView } from "react-native-safe-area-context";
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { FlatList } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
-import homeStyles from "../styles/home";
-import commonStyles from "../styles/common";
-import foodDetailStyles from "../styles/food";
+import homeStyles from '../styles/home';
+import commonStyles from '../styles/common';
+import foodDetailStyles from '../styles/food';
 
-import RestaurantActionBar from "../components/RestaurantActionBar";
-import RestaurantBadge from "../components/RestaurantBadge";
-import RatingBadge from "../components/RatingBadge";
-import RestaurantSectionTitle from "../components/RestaurantSectionTitle";
-import CustomButton from "../components/CustomButton";
+import RestaurantActionBar from '../components/RestaurantActionBar';
+import RestaurantBadge from '../components/RestaurantBadge';
+import RestaurantSectionTitle from '../components/RestaurantSectionTitle';
+import CustomButton from '../components/CustomButton';
 
-import { COLORS } from "../styles/theme";
-import { resolveImage } from "../utils/imageUrl";
+import { COLORS } from '../styles/theme';
+import { resolveImage } from '../utils/imageUrl';
 import {
   fetchFoodById,
   fetchFoodsByCategory,
-} from "../redux/foodSlice";
+  clearFoodDetail,
+} from '../store/foodSlice';
+import { toggleFavorite } from '../store/favoriteSlice';
+import { addCartItem } from '../store/cartSlice';
 
-export default function FoodDetailScreen({
-  navigation,
-  route,
-}) {  
+export default function FoodDetailScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
-  const {
-    food,
-    relatedFoods,
-    status,
-    } = useSelector((state) => state.food);
+  const { food, relatedFoods, status, error } = useSelector(
+    state => state.food,
+  );
 
   const { foodId } = route.params || {};
 
-  const [favorite, setFavorite] = useState(false);
+  const favoriteIds = useSelector(state => state.favorite.items);
+  const favorite = favoriteIds.includes(foodId);
 
   const [quantity, setQuantity] = useState(1);
 
-  if (status === "loading") {
-  return (
-    <SafeAreaView style={commonStyles.screen}>
-      <Text>Loading...</Text>
-    </SafeAreaView>
-  );
-}
+  if (status === 'loading' && !food) {
+    return (
+      <SafeAreaView style={commonStyles.screen}>
+        <View style={[commonStyles.centerContainer, { flex: 1 }]}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+
+          <Text
+            style={{
+              marginTop: 12,
+            }}
+          >
+            Loading...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  if (status === 'failed') {
+    return (
+      <SafeAreaView style={commonStyles.screen}>
+        <View style={[commonStyles.centerContainer, { flex: 1 }]}>
+          <Text>{error ?? 'Unable to load food.'}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!food) {
     return (
       <SafeAreaView style={commonStyles.screen}>
-        <Text>Food not found.</Text>
+        <View style={[commonStyles.centerContainer, { flex: 1 }]}>
+          <Text>Food not found.</Text>
+        </View>
       </SafeAreaView>
     );
   }
 
   const totalPrice = useMemo(() => {
-    return Number(food.price || 0) * quantity;
-  }, [food.price, quantity]);
+    return Number(food?.price ?? 0) * quantity;
+  }, [food, quantity]);
 
   const handleIncrease = () => {
-    setQuantity((q) => q + 1);
+    setQuantity(q => q + 1);
   };
 
   const handleDecrease = () => {
-    setQuantity((q) => Math.max(1, q - 1));
+    setQuantity(q => Math.max(1, q - 1));
   };
 
   const handleFavorite = () => {
-    setFavorite(!favorite);
+    dispatch(toggleFavorite(food.id));
   };
 
   const handleShare = () => {
@@ -88,44 +107,43 @@ export default function FoodDetailScreen({
     // sau này dùng Share API
   };
 
-  const handleAddToCart = () => {
-    /**
-     * Backend sau này:
-     *
-     * {
-     *    foodId: food.id,
-     *    quantity
-     * }
-     *
-     * dispatch(addCart())
-     *
-     */
+  const handleAddToCart = async () => {
+    try {
+      await dispatch(
+        addCartItem({
+          foodId: food.id,
+          quantity,
+        }),
+      ).unwrap();
+
+      navigation.navigate('Cart');
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   useEffect(() => {
-  if (foodId) {
+    if (!foodId) return;
     dispatch(fetchFoodById(foodId));
-  }
-}, [
-  dispatch,
-  foodId,
-]);
-  
+    return () => {
+      dispatch(clearFoodDetail());
+    };
+  }, [dispatch, foodId]);
+
   useEffect(() => {
-  if (food?.categoryId) {
+    if (!food?.categoryId) return;
+
     dispatch(
       fetchFoodsByCategory({
         categoryId: food.categoryId,
-      })
+        pageNumber: 1,
+        pageSize: 10,
+      }),
     );
-  }
-}, [
-  dispatch,
-  food,
-]);
+  }, [dispatch, food?.categoryId]);
 
   return (
-    <SafeAreaView style={commonStyles.screen} edges={['bottom']} >
+    <SafeAreaView style={commonStyles.screen} edges={['bottom']}>
       <RestaurantActionBar
         top={insets.top}
         favorite={favorite}
@@ -134,88 +152,78 @@ export default function FoodDetailScreen({
         onSharePress={handleShare}
       />
 
-      <ScrollView  showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 40,}}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         <Image
           source={resolveImage(food.image)}
           style={foodDetailStyles.heroImage}
           resizeMode="cover"
         />
         <View style={foodDetailStyles.content}>
-          <RestaurantBadge
-            text={food.status || "Available"}
-          />
+          <RestaurantBadge text={food.status} />
           <Text style={foodDetailStyles.name}> {food.name} </Text>
-          <View  style={foodDetailStyles.infoRow}>
-            <RatingBadge rating={0} />
-            <View  style={foodDetailStyles.dot } />
-              <Text  style={ foodDetailStyles.infoText }>  1.2k sold   </Text>
-          </View>
-          <View style={ foodDetailStyles.restaurantRow } >
-            <MaterialCommunityIcons
-              name="storefront-outline"
-              size={18}
-              color={COLORS.primary}
-            />
+          <View style={foodDetailStyles.infoRow}></View>
 
-            <Text  style={ foodDetailStyles.restaurantName } >
-              {food.restaurantName || "FoodHub Restaurant"}
-            </Text>
-          </View>
+          {!!food.restaurantName && (
+            <View style={foodDetailStyles.restaurantRow}>
+              <MaterialCommunityIcons
+                name="storefront-outline"
+                size={18}
+                color={COLORS.primary}
+              />
+              <Text style={foodDetailStyles.restaurantName}>
+                {food.restaurantName}{' '}
+              </Text>
+            </View>
+          )}
+
           {!!food.categoryName && (
-            <View  style={ foodDetailStyles.categoryRow} >
+            <View style={foodDetailStyles.categoryRow}>
               <MaterialCommunityIcons
                 name="silverware-fork-knife"
                 size={18}
                 color={COLORS.primary}
               />
-              <Text style={ foodDetailStyles.categoryText } >  {food.categoryName} </Text>
+              <Text style={foodDetailStyles.categoryText}>
+                {' '}
+                {food.categoryName}{' '}
+              </Text>
             </View>
           )}
-          <View  style={foodDetailStyles.priceRow} >
-            <Text  style={foodDetailStyles.price} >
+          <View style={foodDetailStyles.priceRow}>
+            <Text style={foodDetailStyles.price}>
               $ {Number(food.price || 0).toFixed(2)}
-            </Text>
-            <Text style={  foodDetailStyles.oldPrice} >
-              ${( Number(food.price || 0) + 3).toFixed(2)}
             </Text>
           </View>
           <RestaurantSectionTitle title="Description" />
-          <Text style={ foodDetailStyles.description } >
-            {food.description ||
-              "Fresh ingredients prepared daily by our chef. Every order is cooked when you place it to ensure the best taste and quality."}
+          <Text style={foodDetailStyles.description}>
+            {food.description || 'No description available.'}
           </Text>
           <View style={foodDetailStyles.infoCard}>
-            <View style={foodDetailStyles.infoItem } >
-              <MaterialCommunityIcons
-                name="clock-outline"
-                size={22}
-                color={COLORS.primary}
-              />
-              <Text  style={ foodDetailStyles.infoLabel} >  Delivery </Text>
-              <Text  style={ foodDetailStyles.infoValue} >  20-30 min </Text>
-            </View>
-
-            <View style={foodDetailStyles.infoDivider} />
-
-            <View style={foodDetailStyles.infoItem } >
-              <MaterialCommunityIcons
-                name="fire"
-                size={22}
-                color={COLORS.warning}
-              />
-              <Text style={foodDetailStyles.infoLabel} > Calories </Text>
-              <Text  style={ foodDetailStyles.infoValue} >  520 kcal </Text>
-            </View>
-
-            <View style={foodDetailStyles.infoDivider } />
-            <View style={foodDetailStyles.infoItem } >
+            <View style={foodDetailStyles.infoItem}>
               <MaterialCommunityIcons
                 name="food"
                 size={22}
+                color={COLORS.primary}
+              />
+              <Text style={foodDetailStyles.infoLabel}>Category</Text>
+              <Text style={foodDetailStyles.infoValue}>
+                {food.categoryName ?? 'N/A'}
+              </Text>
+            </View>
+            <View style={foodDetailStyles.infoDivider} />
+            <View style={foodDetailStyles.infoItem}>
+              <MaterialCommunityIcons
+                name="cash"
+                size={22}
                 color={COLORS.success}
               />
-              <Text style={foodDetailStyles.infoLabel} > Fresh </Text>
-              <Text style={foodDetailStyles.infoLabel} > Daily </Text>
+              <Text style={foodDetailStyles.infoLabel}>Price</Text>
+              <Text style={foodDetailStyles.infoValue}>
+                ${Number(food.price).toFixed(2)}
+              </Text>
             </View>
           </View>
           <RestaurantSectionTitle title="Quantity" />
@@ -223,7 +231,7 @@ export default function FoodDetailScreen({
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={handleDecrease}
-              style={ foodDetailStyles.qtyButton}
+              style={foodDetailStyles.qtyButton}
             >
               <MaterialCommunityIcons
                 name="minus"
@@ -231,7 +239,7 @@ export default function FoodDetailScreen({
                 color={COLORS.primaryDark}
               />
             </TouchableOpacity>
-            <Text  style={ foodDetailStyles.qtyNumber} > {quantity} </Text>
+            <Text style={foodDetailStyles.qtyNumber}> {quantity} </Text>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={handleIncrease}
@@ -244,85 +252,100 @@ export default function FoodDetailScreen({
               />
             </TouchableOpacity>
           </View>
-          <View style={foodDetailStyles.summaryCard} >
+          <View style={foodDetailStyles.summaryCard}>
             <View style={foodDetailStyles.summaryRow}>
-              <Text  style={ foodDetailStyles.summaryLabel} >  Item Price </Text>
-              <Text  style={ foodDetailStyles.summaryValue} > ${Number(food.price || 0).toFixed(2)} </Text>
+              <Text style={foodDetailStyles.summaryLabel}> Item Price </Text>
+              <Text style={foodDetailStyles.summaryValue}>
+                {' '}
+                ${Number(food.price || 0).toFixed(2)}{' '}
+              </Text>
             </View>
-            <View style={foodDetailStyles.summaryRow } >
-              <Text  style={ foodDetailStyles.summaryLabel} >  Quantity </Text>
-              <Text  style={ foodDetailStyles.summaryValue} >  {quantity}</Text>
+            <View style={foodDetailStyles.summaryRow}>
+              <Text style={foodDetailStyles.summaryLabel}> Quantity </Text>
+              <Text style={foodDetailStyles.summaryValue}> {quantity}</Text>
             </View>
-            <View style={foodDetailStyles.totalRow } >
-              <Text  style={ foodDetailStyles.totalLabel} >  Total </Text>
-              <Text  style={ foodDetailStyles.totalValue} >  ${totalPrice.toFixed(2)} </Text>
+            <View style={foodDetailStyles.totalRow}>
+              <Text style={foodDetailStyles.totalLabel}> Total </Text>
+              <Text style={foodDetailStyles.totalValue}>
+                {' '}
+                ${totalPrice.toFixed(2)}{' '}
+              </Text>
             </View>
           </View>
           <CustomButton
-            title={`Add to Cart • $${totalPrice.toFixed(2 )}`}
+            title={`Add to Cart • $${totalPrice.toFixed(2)}`}
             onPress={handleAddToCart}
           />
-          <RestaurantSectionTitle  title="You may also like" />
-          <FlatList
-            horizontal
-            data={ relatedFoods}
-            keyExtractor={(item) =>item.id.toString()}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                activeOpacity={0.85}
-                style={homeStyles.foodCard}
-                onPress={() =>
-                    navigation.push(
-                        "FoodDetail",
-                        {
+          {relatedFoods.length > 0 && (
+            <>
+              <RestaurantSectionTitle title="You may also like" />
+              <FlatList
+                horizontal
+                data={relatedFoods}
+                keyExtractor={item => String(item.id)}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    style={homeStyles.foodCard}
+                    onPress={() =>
+                      navigation.push('FoodDetail', {
+                        foodId: item.id,
+                      })
+                    }
+                  >
+                    <View style={homeStyles.foodImageContainer}>
+                      <Image
+                        source={resolveImage(item.image)}
+                        style={homeStyles.foodImage}
+                      />
+
+                      <TouchableOpacity
+                        style={homeStyles.favoriteButton}
+                        onPress={() => dispatch(toggleFavorite(item.id))}
+                      >
+                        <MaterialCommunityIcons
+                          name={
+                            favoriteIds.includes(item.id)
+                              ? 'heart'
+                              : 'heart-outline'
+                          }
+                          size={18}
+                          color={COLORS.primary}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <Text numberOfLines={1} style={homeStyles.foodName}>
+                      {item.name}
+                    </Text>
+
+                    <View style={homeStyles.foodBottom}>
+                      <Text style={homeStyles.foodPrice}>
+                        $ {Number(item.price).toFixed(2)}
+                      </Text>
+                      <TouchableOpacity
+                        style={homeStyles.addButton}
+                        onPress={() => {
+                          navigation.push('FoodDetail', {
                             foodId: item.id,
-                        }
-                    )
-                }
-              >
-                <View style={ homeStyles.foodImageContainer }>
-                  <Image
-                    source={resolveImage(
-                        item.image
-                    )}
-                    style={ homeStyles.foodImage }
-                  />
-
-                  <TouchableOpacity style={ homeStyles.favoriteButton }>
-                    <MaterialCommunityIcons
-                      name="heart-outline"
-                      size={18}
-                      color={
-                          COLORS.primary
-                      }
-                    />
+                          });
+                        }}
+                      >
+                        <MaterialCommunityIcons
+                          name="plus"
+                          size={18}
+                          color={COLORS.primaryDark}
+                        />
+                      </TouchableOpacity>
+                    </View>
                   </TouchableOpacity>
-                </View>
+                )}
+              />
+            </>
+          )}
 
-                <Text numberOfLines={1}
-                    style={ homeStyles.foodName } >
-                    {item.name}
-                </Text>
-
-                <View style={ homeStyles.foodBottom}>
-                  <Text style={ homeStyles.foodPrice}>
-                      $ {Number(item.price).toFixed(2)}
-                  </Text>
-                  <TouchableOpacity style={ homeStyles.addButton }>
-                    <MaterialCommunityIcons
-                      name="plus"
-                      size={18}
-                      color={
-                          COLORS.primaryDark
-                      }
-                    />
-                  </TouchableOpacity>
-                </View>
-            </TouchableOpacity>
-            )}
-          />
-          <View style={{ height: 40, }} />
+          <View style={{ height: 40 }} />
         </View>
       </ScrollView>
     </SafeAreaView>

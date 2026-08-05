@@ -7,6 +7,7 @@ import {
   getFoods,
   getFoodById,
   getFoodsByCategory,
+  searchFoods,
 } from "../services/foodService";
 
 // ==============================
@@ -37,6 +38,24 @@ export const fetchFoodById =
       return await getFoodById(id);
     }
   );
+
+export const fetchSearchFoods =
+createAsyncThunk(
+  "food/fetchSearchFoods",
+  async ({
+    keyword="",
+    pageNumber = 1,
+    pageSize = 20,
+  } ={}) => {
+
+    return await searchFoods(
+      keyword,
+      pageNumber,
+      pageSize
+    );
+
+  }
+);
 
 // ==============================
 // GET RELATED FOODS
@@ -70,6 +89,8 @@ const initialState = {
 
   totalCount: 0,
 
+  searchResults: [],
+
   // Detail
 
   food: null,
@@ -96,6 +117,10 @@ const foodSlice = createSlice({
       state.relatedFoods = [];
     },
 
+    clearSearchResults(state) {
+      state.searchResults = [];
+    },
+
   },
 
   extraReducers: (builder) => {
@@ -109,7 +134,11 @@ const foodSlice = createSlice({
       .addCase(
         fetchFoods.pending,
         (state) => {
+
           state.status = "loading";
+
+          state.searchResults = [];
+
         }
       )
 
@@ -119,17 +148,13 @@ const foodSlice = createSlice({
 
           state.status = "succeeded";
 
-          state.items =
-            action.payload.items;
+          state.items = action.payload.items;
 
-          state.pageNumber =
-            action.payload.pageNumber;
+          state.pageNumber = action.payload.pageNumber;
 
-          state.totalPages =
-            action.payload.totalPages;
+          state.totalPages = action.payload.totalPages;
 
-          state.totalCount =
-            action.payload.totalCount;
+          state.totalCount = action.payload.totalCount;
         }
       )
 
@@ -139,8 +164,7 @@ const foodSlice = createSlice({
 
           state.status = "failed";
 
-          state.error =
-            action.error.message;
+          state.error = action.error.message;
         }
       )
 
@@ -218,13 +242,49 @@ const foodSlice = createSlice({
           state.error =
             action.error.message;
         }
-      );
-  },
+      )
+
+      // SEARCH FOODS
+
+      .addCase(
+      fetchSearchFoods.pending,
+      (state) => {
+
+        state.status = "loading";
+
+      }
+    )
+
+      .addCase(
+        fetchSearchFoods.fulfilled,
+        (state, action) => {
+
+          state.status = "succeeded";
+
+          state.searchResults =
+            action.payload.items;
+
+        }
+      )
+
+    .addCase(
+      fetchSearchFoods.rejected,
+      (state, action) => {
+
+        state.status = "failed";
+
+        state.error =
+          action.error.message;
+
+      }
+    )
+    },
 
 });
 
 export const {
   clearFoodDetail,
+  clearSearchResults,
 } = foodSlice.actions;
 
 export default foodSlice.reducer;
