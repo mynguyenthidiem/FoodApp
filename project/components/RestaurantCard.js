@@ -4,9 +4,11 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 
 import homeStyles from "../styles/home";
 import { COLORS } from "../styles/theme";
+import { resolveImage } from "../utils/imageUrl";
 
 export default function RestaurantCard({
   image,
+  imageUrl,
   name,
   address,
   rating,
@@ -22,7 +24,7 @@ export default function RestaurantCard({
       onPress={onPress}
     >
       <Image
-        source={image}
+        source={resolveImage(imageUrl ?? image)}
         style={homeStyles.restaurantImage}
         resizeMode="cover"
       />
@@ -34,13 +36,13 @@ export default function RestaurantCard({
 
         <Text style={homeStyles.restaurantAddress} numberOfLines={1}>
           {address}
-          {isActive === false ? " • Đóng cửa" : ""}
+          {isActive === false ? " • Closed" : ""}
         </Text>
 
         <View style={homeStyles.restaurantInfo}>
           <MaterialCommunityIcons name="star" size={14} color={COLORS.primary} />
           <Text style={homeStyles.infoText}>
-            {Number(rating ?? 0).toFixed(1)} ({totalReviews ?? 0})
+            {Number(rating ?? 0).toFixed(1)} {" ("}{totalReviews ?? 0}{")"}
           </Text>
 
           <MaterialCommunityIcons

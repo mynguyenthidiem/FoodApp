@@ -18,6 +18,7 @@ export const getFoods = async (
 // GET /api/Foods/{id}
 export const getFoodById = async (id) => {
   const response = await api.get(`/Foods/${id}`);
+
   return response.data;
 };
 
@@ -31,6 +32,26 @@ export const getFoodsByCategory = async (
     `/Foods/category/${categoryId}`,
     {
       params: {
+        pageNumber,
+        pageSize,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+// GET /api/Foods/search
+export const searchFoods = async (
+  keyword,
+  pageNumber = 1,
+  pageSize = 20
+) => {
+  const response = await api.get(
+    "/Foods/search",
+    {
+      params: {
+        keyword,
         pageNumber,
         pageSize,
       },
