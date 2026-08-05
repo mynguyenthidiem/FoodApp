@@ -1,13 +1,15 @@
 export const COLORS = {
   primary: "#FF6B35",
   primaryDark: "#C65A1E",
-  primaryLight:"#FF8A50",
+  primaryLight: "#FF8A50",  
+  primaryLighter: "#fdb59d",
 
   secondary: "#FFE1DB",
   tertiary: "#00A7CB",
 
   background: "#FFF7F3",
-  surface: "#FFFFFF",
+  surface: "#FFFFFF",  
+  surfaceContainerLow: '#fff1ee',
 
   heading: "#2F2F2F",
   text: "#555555",
@@ -18,14 +20,14 @@ export const COLORS = {
   border: "#F3E0D9",
   divider: "#DADADA",
   placeholder: "#999999",
-  
+
   overlayWhiteLight: "rgba(255,255,255,0.35)",
   overlayWhite: "rgba(255,255,255,0.67)",
 
   overlayBlackLight: "rgba(0,0,0,0.25)",
   overlayBlack: "rgba(0,0,0,0.55)",
   overlayBlackDark: "rgba(0,0,0,0.9)",
-  
+
   white: "#FFFFFF",
   black: "#000000",
   brown: "#572106",
@@ -36,16 +38,16 @@ export const COLORS = {
 };
 
 export const FONT = {
-  h1:32,
-  h2:28,
-  h3:24,
-  h4:20,
+  h1: 32,
+  h2: 28,
+  h3: 24,
+  h4: 20,
 
-  subtitle:18,
-  body:16,
-  label:14,
-  small:13,
-  caption:12,
+  subtitle: 18,
+  body: 16,
+  label: 14,
+  small: 13,
+  caption: 12,
 };
 
 export const SPACING = {

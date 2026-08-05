@@ -9,7 +9,7 @@ const commonStyles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.xl,
     backgroundColor: COLORS.background,
-},
+  },
   centerContainer: {
     justifyContent: "center",
     alignItems: "center",
@@ -18,155 +18,161 @@ const commonStyles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: COLORS.background,
     paddingHorizontal: SPACING.lg,
-    paddingBottom: 120,    
+    paddingBottom: 120,
   },
-  screen: {    
-    flex:1,
+  screen: {
+    flex: 1,
     backgroundColor: COLORS.background,
   },
 
   // BackHeader
-header: {
-  flexDirection: "row",
-  alignItems: "center",
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
 
-  height: 60,
+    height: 60,
 
-  paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
 
-  borderBottomWidth: 1,
-  borderBottomColor: COLORS.divider,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.divider,
 
-  marginBottom: SPACING.lg,
-},
+    marginBottom: SPACING.lg,
+  },
 
-headerContent: {
-  flex: 1,
-  justifyContent: "center",
-},
+  headerContent: {
+    flex: 1,
+    justifyContent: "center",
+  },
 
-headerTitle: {
-  fontSize: FONT.h4,
-  fontWeight: "700",
-  color: COLORS.primaryDark,
-},
+  headerTitle: {
+    fontSize: FONT.h4,
+    fontWeight: "700",
+    color: COLORS.primaryDark,
+  },
 
-headerSubtitle: {
-  marginTop: 2,
+  headerSubtitle: {
+    marginTop: 2,
 
-  fontSize: FONT.small,
-  color: COLORS.neutral,
-},
+    fontSize: FONT.small,
+    color: COLORS.neutral,
+  },
 
-headerRightButton: {
-  width: 40,
-  height: 40,
+  headerRightButton: {
+    width: 40,
+    height: 40,
 
-  justifyContent: "center",
-  alignItems: "center",
-},
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-backButton: {
-  width: 40,
-  height: 40,
+  backButton: {
+    width: 40,
+    height: 40,
 
-  justifyContent: "center",
-  alignItems: "center",
+    justifyContent: "center",
+    alignItems: "center",
 
-  marginRight: SPACING.sm,
-},
+    marginRight: SPACING.sm,
+  },
 
-title:{
-  fontSize: FONT.h1,
-  fontWeight: '700',
-  color: COLORS.heading,
-},
+  title: {
+    fontSize: FONT.h1,
+    fontWeight: '700',
+    color: COLORS.heading,
+  },
 
-subtitle: {
-  fontSize: FONT.subtitle,
-  color: COLORS.subtitle,
-  marginBottom: SPACING.lg,
-},
+  subtitle: {
+    fontSize: FONT.subtitle,
+    color: COLORS.subtitle,
+    marginBottom: SPACING.lg,
+  },
 
-card: {
-  width: "100%",
-  backgroundColor: COLORS.surface,
-  borderRadius: RADIUS.xxl,
-  padding: SPACING.xl,
-  marginBottom: SPACING.sm,
-  ...SHADOW,
-},
+  card: {
+    width: "100%",
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.xxl,
+    padding: SPACING.xl,
+    marginBottom: SPACING.sm,
+    ...SHADOW,
+  },
 
-button: {
-  width: "100%",
-  height: 55,
+  button: {
+    width: "100%",
+    height: 55,
 
-  justifyContent: "center",
-  alignItems: "center",
+    justifyContent: "center",
+    alignItems: "center",
 
-  backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
 
-  borderRadius: RADIUS.pill,
+    borderRadius: RADIUS.pill,
 
-  marginTop: SPACING.sm,
+    marginTop: SPACING.sm,
 
-  ...SHADOW,
-},
+    ...SHADOW,
+  },
 
-buttonText: {
-  fontSize: FONT.subtitle,
-  fontWeight: "bold",
-  color: COLORS.white,
-},
+  buttonText: {
+    fontSize: FONT.subtitle,
+    fontWeight: "bold",
+    color: COLORS.white,
+  },
 
-label: {
-  alignSelf: "flex-start",
-  fontSize: FONT.label,
-  color: COLORS.text,
-  marginBottom: 6,
-},
+  label: {
+    alignSelf: "flex-start",
+    fontSize: FONT.label,
+    color: COLORS.text,
+    marginBottom: 6,
+  },
 
-link: {
-  color: COLORS.primaryDark,
-  fontWeight: "bold",
-},
+  link: {
+    color: COLORS.primaryDark,
+    fontWeight: "bold",
+  },
 
-footerText: {
-  color: COLORS.text,
-  fontSize: FONT.small,
-  lineHeight: FONT.small * 1.4,
-},
+  footerText: {
+    color: COLORS.text,
+    fontSize: FONT.small,
+    lineHeight: FONT.small * 1.4,
+  },
 
-orText: {
-  textAlign: "center",
-  color: COLORS.neutral,
-  marginVertical: SPACING.xl,
-},
+  orText: {
+    textAlign: "center",
+    color: COLORS.neutral,
+    marginVertical: SPACING.xl,
+  },
 
-// Bottom Navigation
-bottomTabBar: {
-  position: "absolute",
-  height: 94,
-  backgroundColor: COLORS.background,
+  // Bottom Navigation
+  bottomTabBar: {
+    position: "absolute",
+    height: 94,
+    backgroundColor: COLORS.background,
 
-  ...SHADOW,
-},
+    ...SHADOW,
+  },
 
-activeIcon: {
-  width: 46,
-  height: 28,
+  activeIcon: {
+    width: 46,
+    height: 28,
 
-  borderRadius: RADIUS.circle,
+    borderRadius: RADIUS.circle,
 
-  backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
 
-  justifyContent: "center",
-  alignItems: "center",
+    justifyContent: "center",
+    alignItems: "center",
 
-  ...SHADOW,
-},
+    ...SHADOW,
+  },
 
-
+  // scroller
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: COLORS.background,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: 120,
+  },
 });
 
 export default commonStyles;

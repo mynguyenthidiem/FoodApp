@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 namespace backend.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [Route("api/cart")]
     [ApiController]
     public class CartController : ControllerBase
@@ -74,7 +74,7 @@ namespace backend.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }

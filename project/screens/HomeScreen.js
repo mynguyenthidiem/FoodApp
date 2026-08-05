@@ -25,15 +25,17 @@ import { toggleFavorite } from "../store/favoriteSlice";
 
 // Backend không trả icon glyph cho category → map tạm theo tên (không phân biệt hoa/thường)
 const CATEGORY_ICON_MAP = {
-  pizza: "pizza",
+  mains: "silverware-fork-knife",
   burger: "hamburger",
-  sushi: "fish",
-  dessert: "cupcake",
-  bbq: "grill",
-  drink: "coffee",
-  "đồ uống": "coffee",
-  vegan: "sprout",
-  seafood: "fishbowl",
+  sides: "food",
+  drinks: "cup",
+  desserts: "ice-cream",
+  appetizers: "food",
+  bakery: "bread-slice",
+  cakes: "cake-variant",
+  coffee: "coffee",
+  salads: "leaf",
+  smoothies: "fruit-cherries",
 };
 
 function getCategoryIcon(name = "") {
@@ -57,22 +59,22 @@ export default function HomeScreen({ navigation }) {
   } = useSelector((state) => state.food);
 
   const {
-  items: restaurants,
-  status: restaurantStatus,
-  error: restaurantError,
-} = useSelector((state) => state.restaurant);
+    items: restaurants,
+    status: restaurantStatus,
+    error: restaurantError,
+  } = useSelector((state) => state.restaurant);
 
   const favoriteIds = useSelector((state) => state.favorite.items);
 
   const handleFavorite = (item) => {
     dispatch(toggleFavorite(item.id));
   };
-  
+
   useEffect(() => {
-      dispatch(fetchCategories());
-      dispatch(fetchFoods());
-      dispatch(fetchRestaurants());
-    }, [dispatch]);
+    dispatch(fetchCategories());
+    dispatch(fetchFoods());
+    dispatch(fetchRestaurants());
+  }, [dispatch]);
 
   return (
     <SafeAreaView style={commonStyles.screen} edges={["top", "left", "right"]}>
@@ -119,25 +121,34 @@ export default function HomeScreen({ navigation }) {
         />
 
         {restaurantStatus === "loading" && <ActivityIndicator color={COLORS.primary} />}
-  {restaurantStatus === "failed" && (
-    <Text style={{ color: COLORS.error }}>Không tải được nhà hàng: {restaurantError}</Text>
-  )}
-  {restaurantStatus === "succeeded" &&
-    restaurants.map((item) => (
-      <RestaurantCard
-        key={item.id}
-        // {...item}
-        // image={resolveImage(item.imageUrl)}
-        onPress={() => navigation.navigate("RestaurantDetail", { restaurantId: item.id })}
-      />
-    ))}
+        {restaurantStatus === "failed" && (
+          <Text style={{ color: COLORS.error }}>Không tải được nhà hàng: {restaurantError}</Text>
+        )}
+        {restaurantStatus === "succeeded" &&
+          restaurants.map((item) => (
+            <RestaurantCard
+              key={item.id}
+              image={resolveImage(item.imageUrl)}
+              name={item.name}
+              address={item.address}
+              rating={item.rating}
+              totalReviews={item.totalReviews}
+              deliveryFee={item.deliveryFee}
+              isActive={item.isActive}
+              onPress={() =>
+                navigation.navigate("RestaurantDetail", {
+                  restaurantId: item.id,
+                })
+              }
+            />
+          ))}
 
         <SectionHeader title="Recommended for you" buttonText="See All" />
 
         {foodStatus === "loading" && <ActivityIndicator color={COLORS.primary} />}
         {foodStatus === "failed" && (
           <Text style={{ color: COLORS.error }}>Không tải được món ăn: {foodError}</Text>
-        )}        
+        )}
         {foodStatus === "succeeded" && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {foods.map((item) => (
