@@ -1,36 +1,29 @@
-import { StyleSheet } from "react-native";
-import {
-  COLORS,
-  FONT,
-  SPACING,
-  RADIUS,
-  SHADOW,
-} from "./theme";
+import { StyleSheet } from 'react-native';
+import { COLORS, FONT, SPACING, RADIUS, SHADOW } from './theme';
 
 const homeStyles = StyleSheet.create({
-
   // HOME HEADER
   headerContainer: {
     borderBottomWidth: 1,
     borderBottomColor: COLORS.divider,
-    marginBottom: SPACING.lg,    
+    marginBottom: SPACING.lg,
   },
-  
+
   headerContent: {
     marginHorizontal: SPACING.md,
     marginVertical: SPACING.sm,
   },
 
   headerTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
 
   locationContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: SPACING.xs,    
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.xs,
     marginBottom: SPACING.xs,
   },
 
@@ -38,12 +31,12 @@ const homeStyles = StyleSheet.create({
     marginLeft: SPACING.xs,
     fontSize: FONT.small,
     color: COLORS.neutral,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 
   rightContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   leftContainer: {
     flex: 1,
@@ -51,15 +44,15 @@ const homeStyles = StyleSheet.create({
 
   appName: {
     fontSize: FONT.h2,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.primaryDark,
   },
 
-   // SEARCH BAR
+  // SEARCH BAR
 
   searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: SPACING.xl,
   },
 
@@ -85,113 +78,113 @@ const homeStyles = StyleSheet.create({
 
   //  BANNER
 
-bannerCard: {
-  height: 180,
-  borderRadius: RADIUS.xl,
-  overflow: "hidden",
-  marginBottom: SPACING.xl,
-  ...SHADOW,
-},
+  bannerCard: {
+    height: 180,
+    borderRadius: RADIUS.xl,
+    overflow: 'hidden',
+    marginBottom: SPACING.xl,
+    ...SHADOW,
+  },
 
-bannerImage: {
-  borderRadius: RADIUS.xl,
-},
+  bannerImage: {
+    borderRadius: RADIUS.xl,
+  },
 
-bannerOverlay: {
-  flex: 1,
-  justifyContent: "center",
-  alignItems: "flex-start",
+  bannerOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
 
-  paddingHorizontal: SPACING.xl,
-},
+    paddingHorizontal: SPACING.xl,
+  },
 
-bannerChip: {
-  alignSelf: "flex-start",
+  bannerChip: {
+    alignSelf: 'flex-start',
 
-  backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
 
-  borderRadius: RADIUS.pill,
+    borderRadius: RADIUS.pill,
 
-  marginBottom: SPACING.sm,
+    marginBottom: SPACING.sm,
 
-  height: SPACING.xxxl,
-},
+    height: SPACING.xxxl,
+  },
 
-bannerChipText: {
-  color: COLORS.white,
-  fontWeight: "700",
-  fontSize: FONT.caption,
-},
+  bannerChipText: {
+    color: COLORS.white,
+    fontWeight: '700',
+    fontSize: FONT.caption,
+  },
 
-bannerTitle: {
-  fontSize: FONT.h2,
-  fontWeight: "900",
-  color: COLORS.white,
-},
+  bannerTitle: {
+    fontSize: FONT.h2,
+    fontWeight: '900',
+    color: COLORS.white,
+  },
 
-bannerSubtitle: {
-  marginTop: SPACING.xs,
-  fontSize: FONT.label,
-  color: COLORS.white,
-},
+  bannerSubtitle: {
+    marginTop: SPACING.xs,
+    fontSize: FONT.label,
+    color: COLORS.white,
+  },
 
-//  SECTION HEADER
+  //  SECTION HEADER
 
-sectionHeader: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: SPACING.md,
-  marginTop: SPACING.lg,
-},
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    marginTop: SPACING.lg,
+  },
 
-sectionTitle: {
-  fontSize: FONT.subtitle,
-  fontWeight: "700",
-  color: COLORS.heading,
-},
+  sectionTitle: {
+    fontSize: FONT.subtitle,
+    fontWeight: '700',
+    color: COLORS.heading,
+  },
 
-sectionButton: {
-  fontSize: FONT.small,
-  color: COLORS.primary,
-  fontWeight: "400",
-},
+  sectionButton: {
+    fontSize: FONT.small,
+    color: COLORS.primary,
+    fontWeight: '400',
+  },
 
-// Filter Chip
-filterContainer: {
-  marginBottom: SPACING.xl,
-},
+  // Filter Chip
+  filterContainer: {
+    marginBottom: SPACING.xl,
+  },
 
-filterChip: {
-  paddingHorizontal: SPACING.lg,
-  height: 36,
+  filterChip: {
+    paddingHorizontal: SPACING.lg,
+    height: 36,
 
-  justifyContent: "center",
-  alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
 
-  borderRadius: RADIUS.pill,
+    borderRadius: RADIUS.pill,
 
-  backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.secondary,
 
-  marginRight: SPACING.sm,
-},
+    marginRight: SPACING.sm,
+  },
 
-selectedFilterChip: {
-  backgroundColor: COLORS.primary,
-},
+  selectedFilterChip: {
+    backgroundColor: COLORS.primary,
+  },
 
-filterChipText: {
-  fontSize: FONT.small,
-  color: COLORS.text,
-  fontWeight: "500",
-},
+  filterChipText: {
+    fontSize: FONT.small,
+    color: COLORS.text,
+    fontWeight: '500',
+  },
 
-selectedFilterChipText: {
-  color: COLORS.brown,
-  fontWeight: "600",
-},
+  selectedFilterChipText: {
+    color: COLORS.brown,
+    fontWeight: '600',
+  },
 
-//  CATEGORY CARD
+  //  CATEGORY CARD
 
   categoryList: {
     marginBottom: SPACING.xl,
@@ -199,7 +192,7 @@ selectedFilterChipText: {
 
   categoryCard: {
     width: 70,
-    alignItems: "center",
+    alignItems: 'center',
     marginRight: SPACING.md,
   },
 
@@ -208,8 +201,8 @@ selectedFilterChipText: {
     height: 56,
     borderRadius: RADIUS.circle,
     backgroundColor: COLORS.secondary,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: SPACING.sm,
   },
 
@@ -221,17 +214,17 @@ selectedFilterChipText: {
     marginTop: SPACING.sm,
     fontSize: FONT.caption,
     color: COLORS.text,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 
-selectedCategoryText: {
-  color: COLORS.primary,
-  fontWeight: "700",
-},
+  selectedCategoryText: {
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
   //  RESTAURANT CARD
 
   restaurantCard: {
-    flexDirection: "row",
+    flexDirection: 'row',
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
@@ -248,12 +241,12 @@ selectedCategoryText: {
   restaurantContent: {
     flex: 1,
     marginLeft: SPACING.md,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
 
   restaurantName: {
     fontSize: FONT.body,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.heading,
   },
 
@@ -263,8 +256,8 @@ selectedCategoryText: {
   },
 
   restaurantInfo: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: SPACING.xs,
   },
 
@@ -288,51 +281,51 @@ selectedCategoryText: {
   },
 
   foodImage: {
-    width: "100%",
+    width: '100%',
     height: 100,
-    resizeMode:"cover",
+    resizeMode: 'cover',
     borderRadius: RADIUS.md,
     marginBottom: SPACING.sm,
   },
 
   foodName: {
     fontSize: FONT.label,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.heading,
     marginBottom: SPACING.xs,
   },
 
   foodPrice: {
     fontSize: FONT.body,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.primary,
   },
 
   foodImageContainer: {
-    position: "relative",
-},
+    position: 'relative',
+  },
 
-favoriteButton: {
-  position: "absolute",
-  top: SPACING.sm,
-  right: SPACING.sm,
+  favoriteButton: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
 
-  width: 34,
-  height: 34,
+    width: 34,
+    height: 34,
 
-  borderRadius: RADIUS.circle,
+    borderRadius: RADIUS.circle,
 
-  backgroundColor: COLORS.white,
+    backgroundColor: COLORS.white,
 
-  justifyContent: "center",
-  alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
 
-  ...SHADOW,
-},
+    ...SHADOW,
+  },
   foodBottom: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
 
     marginTop: SPACING.sm,
   },
@@ -345,124 +338,140 @@ favoriteButton: {
 
     backgroundColor: COLORS.secondary,
 
-    justifyContent: "center",
-    alignItems: "center",
-},
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
+  // CATEGORY SCREEN
 
-// CATEGORY SCREEN
+  // Featured
 
-// Featured
+  featuredCategoryCard: {
+    width: '100%',
+    height: 200,
 
-featuredCategoryCard: {
-  width: "100%",
-  height: 200,
+    borderRadius: RADIUS.xl,
+    overflow: 'hidden',
 
-  borderRadius: RADIUS.xl,
-  overflow: "hidden",
+    marginBottom: SPACING.md,
 
-  marginBottom: SPACING.md,
+    ...SHADOW,
+  },
 
-  ...SHADOW,
-},
+  featuredCategoryImage: {
+    width: '100%',
+    height: '100%',
+  },
 
-featuredCategoryImage: {
-  width: "100%",
-  height: "100%",
-},
+  featuredCategoryOverlay: {
+    position: 'absolute',
 
-featuredCategoryOverlay: {
-  position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
 
-  left: 0,
-  right: 0,
-  bottom: 0,
+    height: '60%',
 
-  height: "60%",
+    justifyContent: 'flex-end',
 
-  justifyContent: "flex-end",
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.xl,
+    paddingTop: SPACING.xxxl,
+  },
 
-  paddingHorizontal: SPACING.xl,
-  paddingVertical: SPACING.xl,
-  paddingTop: SPACING.xxxl,
-},
+  featuredBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    backgroundColor: COLORS.tertiary,
 
-featuredBadge: {
-  alignSelf: "flex-start",
-  paddingHorizontal: SPACING.md,
-  paddingVertical: SPACING.xs,
-  backgroundColor:COLORS.tertiary,
+    marginBottom: SPACING.md,
+  },
 
-  marginBottom: SPACING.md,
-},
+  featuredBadgeText: {
+    color: COLORS.brown,
+    fontSize: FONT.caption,
+    textTransform: 'uppercase',
+    fontWeight: '500',
+  },
 
-featuredBadgeText: {
-  color: COLORS.brown,
-  fontSize: FONT.caption,
-  textTransform: "uppercase",
-  fontWeight: "500",
-},
+  featuredCategoryTitle: {
+    color: COLORS.white,
 
-featuredCategoryTitle: {
-  color: COLORS.white,
+    fontSize: FONT.h3,
+    fontWeight: '700',
 
-  fontSize: FONT.h3,
-  fontWeight: "700",
+    marginBottom: SPACING.xs,
+  },
 
-  marginBottom: SPACING.xs,
-},
+  featuredCategorySubtitle: {
+    color: COLORS.white,
+    fontSize: FONT.body,
 
-featuredCategorySubtitle: {
-  color: COLORS.white,
-  fontSize: FONT.body,
+    marginTop: SPACING.xs,
+  },
 
-  marginTop: SPACING.xs,
-},
+  // Row
 
-// Row
+  collectionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
 
-collectionRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
+    marginBottom: SPACING.lg,
+  },
 
-  marginBottom: SPACING.lg,
-},
+  // Collection
 
-// Collection
+  collectionCard: {
+    width: '48%',
+    height: 200,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    ...SHADOW,
+  },
 
-collectionCard: {
-  width: "48%",
-  height: 200,
-  borderRadius: RADIUS.lg,
-  overflow:"hidden",
-  ...SHADOW,
-},
+  collectionGradient: {
+    flex: 1,
+    padding: SPACING.lg,
+    justifyContent: 'space-between',
+  },
 
-collectionGradient: {
-  flex: 1,
-  padding: SPACING.lg,
-  justifyContent: "space-between",
-},
+  collectionTitle: {
+    fontSize: FONT.subtitle,
+    fontWeight: '700',
 
-collectionTitle: {
-  fontSize: FONT.subtitle,
-  fontWeight: "700",
+    color: COLORS.brown,
+  },
 
-  color: COLORS.brown,
-},
+  collectionSubtitle: {
+    marginTop: SPACING.xs,
 
-collectionSubtitle: {
-  marginTop: SPACING.xs,
+    fontSize: FONT.caption,
+    color: COLORS.text,
+  },
 
-  fontSize: FONT.caption,
-  color: COLORS.text,
-},
+  collectionImage: {
+    width: '70%',
+    height: 60,
+    alignSelf: 'flex-end',
+  },
 
-collectionImage: {
-  width: "70%",
-  height: 60,
-  alignSelf:"flex-end",
-},
+  // Search screen
+  searchSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  clearText: { fontSize: FONT.small, color: COLORS.primary, fontWeight: '600' },
+  recentContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
+  emptySearchText: {
+    textAlign: 'center',
+    color: COLORS.neutral,
+    fontSize: FONT.body,
+    marginVertical: SPACING.xl,
+  },
 });
 
 export default homeStyles;
