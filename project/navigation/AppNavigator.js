@@ -17,7 +17,7 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
-    <Stack.Navigator initialRouteName="Login"
+    <Stack.Navigator initialRouteName="Splash"
       screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
@@ -31,8 +31,6 @@ export default function AppNavigator() {
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-
-      {/* <Stack.Screen name="FoodDetail" component={FoodDetailScreen} /> */}
     </Stack.Navigator>
   );
 }

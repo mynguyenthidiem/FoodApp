@@ -1,7 +1,19 @@
 import api from "./client";
 
-// ⚠️ Route là số ít: /api/Restaurant (không phải /Restaurants)
-export const getAllRestaurants = (pageNumber = 1, pageSize = 20) =>
-  api.get("/Restaurant", { params: { pageNumber, pageSize } });
+export const getAllRestaurants = () =>
+  api.get("/Restaurant");
 
-export const getRestaurantById = (id) => api.get(`/Restaurant/${id}`);
+export const getRestaurantById = (id) =>
+  api.get(`/Restaurant/${id}`);
+
+export const createRestaurant = (data) =>
+  api.post("/Restaurant", data);
+
+export const updateRestaurant = (id, data) =>
+  api.put(`/Restaurant/${id}`, data);
+
+export const deleteRestaurant = (id) =>
+  api.delete(`/Restaurant/${id}`);
+
+export const updateRestaurantStatus = (id, data) =>
+  api.patch(`/Restaurant/${id}/status`, data);

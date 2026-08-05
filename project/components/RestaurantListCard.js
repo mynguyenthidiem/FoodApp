@@ -10,10 +10,11 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import restaurantStyles from "../styles/restaurant";
 import { COLORS } from "../styles/theme";
 
-import RestaurantBadge from "./RestaurantBadge";
 import RatingBadge from "./RatingBadge";
 import RestaurantTag from "./RestaurantTag";
 import FavoriteButton from "./FavoriteButton";
+
+import { resolveImage } from "../utils/imageUrl";
 
 export default function RestaurantListCard({
   item,
@@ -26,32 +27,27 @@ export default function RestaurantListCard({
       activeOpacity={0.9}
       onPress={onPress}
     >
-      {/* Image */}
-
       <View style={restaurantStyles.imageContainer}>
         <Image
-          source={item.image}
-          style={restaurantStyles.restaurantImage}
+          source={resolveImage(item.imageUrl)}
+          style={
+            restaurantStyles.restaurantImage
+          }
         />
 
-        <View style={restaurantStyles.badgeContainer}>
-          <RestaurantBadge title={item.badge} />
-        </View>
-
         <FavoriteButton
-          favorite={item.favorite}
+          favorite={false}
           onPress={onFavoritePress}
         />
       </View>
 
-      {/* Content */}
-
       <View style={restaurantStyles.content}>
-
         <View style={restaurantStyles.titleRow}>
           <Text
             numberOfLines={1}
-            style={restaurantStyles.restaurantName}
+            style={
+              restaurantStyles.restaurantName
+            }
           >
             {item.name}
           </Text>
@@ -66,30 +62,49 @@ export default function RestaurantListCard({
             color={COLORS.brown}
           />
 
-          <Text style={restaurantStyles.infoText}>
-            {item.deliveryTime}
+          <Text
+            style={
+              restaurantStyles.infoText
+            }
+          >
+            {item.openTime?.substring(0, 5)}
+            {" - "}
+            {item.closeTime?.substring(0, 5)}
           </Text>
+        </View>
 
+        <View
+          style={[
+            restaurantStyles.infoRow,
+            { marginTop: 4 },
+          ]}
+        >
           <MaterialCommunityIcons
             name="map-marker-outline"
             size={15}
             color={COLORS.brown}
           />
 
-          <Text style={restaurantStyles.infoText}>
-            {item.distance}
+          <Text
+            numberOfLines={1}
+            style={
+              restaurantStyles.infoText
+            }
+          >
+            {item.address}
           </Text>
         </View>
 
         <View style={restaurantStyles.tagRow}>
-          {item.tags.map((tag) => (
-            <RestaurantTag
-              key={tag}
-              title={tag}
-            />
-          ))}
+          {(item.categories || []).map(
+            (category) => (
+              <RestaurantTag
+                key={category}
+                title={category}
+              />
+            )
+          )}
         </View>
-
       </View>
     </TouchableOpacity>
   );

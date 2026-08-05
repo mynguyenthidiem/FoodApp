@@ -1,9 +1,6 @@
-import React, { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import React, { useEffect, useMemo, useState } from "react";
+import { ScrollView, View, ActivityIndicator, Text } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import commonStyles from "../styles/common";
 
@@ -16,106 +13,189 @@ import RestaurantInfoSection from "../components/RestaurantInfoSection";
 import RestaurantFeatureSection from "../components/RestaurantFeatureSection";
 import CartSummaryBar from "../components/CartSummaryBar";
 
-import restaurants from "../data/restaurants";
-import foods from "../data/foods";
-import reviews from "../data/reviews";
+import { getCart, addToCart } from "../api/cartApi";
+import { getRestaurantById } from "../api/restaurantApi";
+import { getFoodsByRestaurant } from "../api/foodApi";
+import { getFoodReviews } from "../api/reviewApi";
 
-const MENU_CATEGORIES = [
-  {
-    id: "appetizers",
-    title: "Appetizers",
-  },
-  {
-    id: "mains",
-    title: "Mains",
-  },
-  {
-    id: "sides",
-    title: "Sides",
-  },
-  {
-    id: "drinks",
-    title: "Drinks",
-  },
-  {
-    id: "desserts",
-    title: "Desserts",
-  },
-];
-
-export default function RestaurantDetailScreen({
-  navigation,
-  route,
-}) {
+export default function RestaurantDetailScreen({ navigation, route }) {
   const { restaurantId } = route.params ?? {};
-
   const insets = useSafeAreaInsets();
 
-  const restaurant = restaurants.find(
-    (item) => item.id === restaurantId
-  );
+  const [restaurant, setRestaurant] = useState(null);
+  const [foods, setFoods] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [selectedTab, setSelectedTab] = useState("Menu");
   const [selectedFilter, setSelectedFilter] = useState("all");
 
-  const cartQuantity = 2;
-  const cartTotal = 23;
+  const [cartQuantity, setCartQuantity] = useState(0);
+  const [cartTotal, setCartTotal] = useState(0);
+
+  useEffect(() => {
+    loadRestaurantDetail();
+  }, []);
+
+
+  const loadRestaurantDetail = async () => {
+    try {
+      const restaurantResponse = await getRestaurantById(restaurantId);
+      setRestaurant(restaurantResponse.data);
+
+      const foodResponse = await getFoodsByRestaurant(restaurantId);
+
+      const foodList = foodResponse.data.items ?? [];
+
+      setFoods(foodList);
+
+
+      let reviewList = [];
+
+      for (const food of foodList) {
+        try {
+          const reviewResponse = await getFoodReviews(food.id);
+
+          const foodReviews =
+            reviewResponse.data.items ??
+            reviewResponse.data ??
+            [];
+
+          reviewList.push(...foodReviews);
+
+        } catch (error) {
+          console.log("Review error:", error);
+        }
+      }
+
+      setReviews(reviewList);
+
+
+      const cartResponse = await getCart();
+
+      const cartItems = cartResponse.data ?? [];
+
+
+      const quantity = cartItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
+
+
+      const total = cartItems.reduce(
+        (sum, item) => sum + item.totalPrice,
+        0
+      );
+
+
+      setCartQuantity(quantity);
+      setCartTotal(total);
+
+    } catch (error) {
+      console.log("Load restaurant detail error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const handleAddToCart = async (food) => {
+    try {
+      await addToCart({
+        foodId: food.id,
+        quantity: 1,
+      });
+
+      loadRestaurantDetail();
+
+    } catch (error) {
+      console.log("Add cart error:", error);
+    }
+  };
+
 
   const restaurantFoods = useMemo(() => {
-    if (!restaurant) return [];
+    return foods;
+  }, [foods]);
 
-    return foods.filter(
-      (food) => food.restaurantId === restaurant.id
-    );
-  }, [restaurant]);
 
   const restaurantReviews = useMemo(() => {
-    if (!restaurant) return [];
+    return reviews;
+  }, [reviews]);
 
-    return reviews.filter(
-      (review) => review.restaurantId === restaurant.id
-    );
+
+  const menuCategories = useMemo(() => {
+    if (!restaurant?.categories) return [];
+
+    return restaurant.categories.map((category) => ({
+      id: category,
+      title: category,
+    }));
+
   }, [restaurant]);
 
-  const menuFilters = useMemo(
-    () => [
-      {
-        id: "all",
-        title: "All",
-      },
-      ...MENU_CATEGORIES,
-    ],
-    []
-  );
+
+  const menuFilters = useMemo(() => [
+    {
+      id: "all",
+      title: "All",
+    },
+    ...menuCategories,
+  ], [menuCategories]);
+
 
   const menuSections = useMemo(() => {
+
     const filteredFoods =
       selectedFilter === "all"
         ? restaurantFoods
         : restaurantFoods.filter(
-            (food) => food.category === selectedFilter
+            (food) =>
+              food.categoryName === selectedFilter
           );
 
-    return MENU_CATEGORIES.map((section) => ({
-      id: section.id,
-      title: section.title,
-      items: filteredFoods.filter(
-        (food) => food.category === section.id
-      ),
-    })).filter(
-      (section) => section.items.length > 0
+
+    return menuCategories
+      .map((section) => ({
+        id: section.id,
+        title: section.title,
+        items: filteredFoods.filter(
+          (food) =>
+            food.categoryName === section.id
+        ),
+      }))
+      .filter(
+        (section) =>
+          section.items.length > 0
+      );
+
+  }, [
+    restaurantFoods,
+    selectedFilter,
+    menuCategories,
+  ]);
+
+
+  if (loading) {
+    return (
+      <SafeAreaView style={commonStyles.screen}>
+        <ActivityIndicator />
+      </SafeAreaView>
     );
-  }, [restaurantFoods, selectedFilter]);
+  }
+
 
   if (!restaurant) {
     return null;
   }
+
 
   return (
     <SafeAreaView
       style={commonStyles.screen}
       edges={["top", "bottom"]}
     >
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
@@ -123,6 +203,7 @@ export default function RestaurantDetailScreen({
           paddingBottom: 120 + insets.bottom,
         }}
       >
+
         <RestaurantHeroCard
           restaurant={restaurant}
           onBackPress={() => navigation.goBack()}
@@ -130,14 +211,21 @@ export default function RestaurantDetailScreen({
           onFavoritePress={() => {}}
         />
 
+
         <RestaurantTabs
-          tabs={["Menu", "Reviews", "Info"]}
+          tabs={[
+            "Menu",
+            "Reviews",
+            "Info",
+          ]}
           selectedTab={selectedTab}
           onChange={setSelectedTab}
         />
 
+
         {selectedTab === "Menu" && (
           <>
+
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -145,6 +233,7 @@ export default function RestaurantDetailScreen({
                 paddingVertical: 10,
               }}
             >
+
               {menuFilters.map((filter) => (
                 <FilterChip
                   key={filter.id}
@@ -157,7 +246,9 @@ export default function RestaurantDetailScreen({
                   }
                 />
               ))}
+
             </ScrollView>
+
 
             {menuSections.map((section) => (
               <MenuSection
@@ -172,36 +263,51 @@ export default function RestaurantDetailScreen({
                     }
                   )
                 }
-                onAddPress={(food) =>
-                  console.log("Add:", food.name)
-                }
+                onAddPress={handleAddToCart}
               />
             ))}
+
           </>
         )}
 
+
         {selectedTab === "Reviews" && (
           <View>
-            {restaurantReviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-              />
-            ))}
+
+            {restaurantReviews.length === 0 ? (
+              <Text>
+                No reviews yet
+              </Text>
+            ) : (
+
+              restaurantReviews.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                />
+              ))
+
+            )}
+
           </View>
         )}
 
         {selectedTab === "Info" && (
           <>
+
             <RestaurantInfoSection
               restaurant={restaurant}
             />
 
             <RestaurantFeatureSection
-              features={restaurant.features ?? []}
+              features={
+                restaurant.features ?? []
+              }
             />
+
           </>
         )}
+
       </ScrollView>
 
       <CartSummaryBar
@@ -212,6 +318,7 @@ export default function RestaurantDetailScreen({
           navigation.navigate("Cart")
         }
       />
+
     </SafeAreaView>
   );
 }
