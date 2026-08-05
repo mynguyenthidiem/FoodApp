@@ -6,6 +6,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 
 import restaurantStyles from "../styles/restaurant";
 import { COLORS } from "../styles/theme";
+import { resolveImage } from "../utils/imageUrl";
 
 export default function ReviewCard({
   review
@@ -14,10 +15,10 @@ export default function ReviewCard({
     <View style={restaurantStyles.reviewCard}>
 
       <View style={restaurantStyles.reviewHeader}>
-         <Avatar.Image
-              size={42}
-              source={review.avatar}
-            />
+        <Avatar.Image
+          size={42}
+          source={resolveImage(review.avatar)}
+        />
         <Text
           style={restaurantStyles.reviewAuthor}
         >

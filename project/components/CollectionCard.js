@@ -1,4 +1,3 @@
-import LinearGradient from "react-native-linear-gradient";
 import {
   TouchableOpacity,
   View,
@@ -6,15 +5,21 @@ import {
   Image,
 } from "react-native";
 
+import LinearGradient from "react-native-linear-gradient";
+
 import homeStyles from "../styles/home";
 import { COLORS } from "../styles/theme";
+import { resolveImage } from '../utils/imageUrl'; // chỉnh đúng path của bạn
 
-export default function CollectionCard({ item, onPress }) {
+export default function CollectionCard({ item, onPress, featured = false, }) {
   return (
     <TouchableOpacity
-      style={homeStyles.collectionCard}
+      style={[
+        homeStyles.collectionCard,
+        featured &&
+        homeStyles.featuredCollectionCard,
+      ]}
       onPress={onPress}
-      activeOpacity={0.8}
     >
       <LinearGradient
         colors={[
@@ -38,7 +43,7 @@ export default function CollectionCard({ item, onPress }) {
         </View>
 
         <Image
-          source={item.image}
+          source={resolveImage(item.image)}
           style={homeStyles.collectionImage}
         />
       </LinearGradient>

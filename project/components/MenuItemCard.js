@@ -7,6 +7,7 @@ import {
 } from "react-native";
 
 import restaurantStyles from "../styles/restaurant";
+import { resolveImage } from "../utils/imageUrl";
 
 export default function MenuItemCard({
   item,
@@ -20,7 +21,7 @@ export default function MenuItemCard({
       onPress={onPress}
     >
       <Image
-        source={item.image}
+        source={resolveImage(item.image)}
         style={restaurantStyles.menuItemImage}
         resizeMode="cover"
       />
@@ -36,7 +37,7 @@ export default function MenuItemCard({
           </Text>
 
           <Text style={restaurantStyles.menuItemPrice}>
-            ${item.price.toFixed(2)}
+            ${Number(item.price ?? 0).toFixed(2)}
           </Text>
         </View>
 
@@ -58,6 +59,7 @@ export default function MenuItemCard({
         </TouchableOpacity>
 
       </View>
+
     </TouchableOpacity>
   );
 }

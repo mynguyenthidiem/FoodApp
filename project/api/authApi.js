@@ -1,16 +1,16 @@
 import api from "./client";
 
 export const login = (data) =>
-  api.post("/auth/login", data);
+  api.post("/Auth/login", data);
 
 export const register = (data) =>
-  api.post("/auth/register", data);
-
-export const googleLogin = (data) =>
-  api.post("/auth/google", data);
+  api.post("/Auth/register", data);
 
 export const getProfile = () =>
-  api.get("/auth/profile");
+  api.get("/Auth/profile");
+
+export const googleLogin = (data) =>
+  api.post("/Auth/google", data);
 
 export const changePassword = (data) =>
-  api.put("/auth/change-password", data);
+  api.put("/Auth/change-password", data);

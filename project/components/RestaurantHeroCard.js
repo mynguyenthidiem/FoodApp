@@ -11,7 +11,7 @@ import restaurantStyles from "../styles/restaurant";
 
 import RatingBadge from "./RatingBadge";
 import RestaurantActionBar from "./RestaurantActionBar";
-
+import { resolveImage } from "../utils/imageUrl";
 export default function RestaurantHeroCard({
   restaurant,
   onBackPress,
@@ -19,15 +19,14 @@ export default function RestaurantHeroCard({
   return (
     <View style={restaurantStyles.heroCard}>
       <Image
-        source={restaurant.image}
+        source={resolveImage(restaurant.imageUrl)}
         style={restaurantStyles.heroImage}
       />
-
       <RestaurantActionBar
         favorite={restaurant.favorite}
         onBackPress={onBackPress}
-        onSharePress={() => {}}
-        onFavoritePress={() => {}}
+        onSharePress={() => { }}
+        onFavoritePress={() => { }}
       />
 
       <View style={restaurantStyles.heroContent}>

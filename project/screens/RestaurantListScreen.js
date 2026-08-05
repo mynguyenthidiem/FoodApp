@@ -1,9 +1,5 @@
-import React, { useState } from "react";
-import {
-  ScrollView,
-  View,
-  Text,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { ScrollView, View, Text, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import commonStyles from "../styles/common";
@@ -13,147 +9,81 @@ import BackHeader from "../components/BackHeader";
 import FilterChip from "../components/FilterChip";
 import RestaurantListCard from "../components/RestaurantListCard";
 
-import restaurants from "../data/restaurants";
+import { getAllRestaurants } from "../api/restaurantApi";
 
-export default function RestaurantListScreen({
-  navigation,
-  route,
-}) {
-  const {
-    type = "all",
-    value = "",
-    title = "Restaurants",
-  } = route.params || {};
+export default function RestaurantListScreen({ navigation, route }) {
+  const { categoryName, filter } = route.params ?? {};
+  const filters = ["All", "Top Rated"];
 
-  const filters = [
-    "All",
-    "Top Rated",
-    "Fast Delivery",
-    "Price: Low",
-  ];
+  const [selectedFilter, setSelectedFilter] = useState(filter || "All");
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [selectedFilter, setSelectedFilter] =
-    useState(filters[0]);
-
-  // Sau khi tích hợp backend chỉ cần thay bằng dữ liệu API
-  const getRestaurants = () => {
-    switch (type) {
-      case "category":
-        return restaurants.filter((restaurant) =>
-          restaurant.categories.includes(value)
-        );
-
-      case "featured":
-        return restaurants.filter((restaurant) =>
-          restaurant.featured.includes(value)
-        );
-
-      case "cuisine":
-        return restaurants.filter(
-          (restaurant) =>
-            restaurant.cuisine === value
-        );
-
-      case "all":
-      default:
-        return restaurants;
+  const loadRestaurants = async () => {
+    try {
+      setLoading(true);
+      const response = await getAllRestaurants();
+      setRestaurants(response.data.items || []);
+    } catch (error) {
+      console.log("Load restaurants failed:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  let filteredRestaurants = getRestaurants();
+  useEffect(() => {
+    loadRestaurants();
+  }, []);
 
-  // Demo filter ở Front-end
-  switch (selectedFilter) {
-    case "Top Rated":
-      filteredRestaurants = filteredRestaurants.filter(
-        (restaurant) => restaurant.rating >= 4.7
-      );
-      break;
+  let filteredRestaurants = [...restaurants];
 
-    case "Fast Delivery":
-      filteredRestaurants = filteredRestaurants.filter(
-        (restaurant) => {
-          const maxTime = parseInt(
-            restaurant.deliveryTime.split("-")[1]
-          );
-          return maxTime <= 25;
-        }
-      );
-      break;
+  if (categoryName) {
+    filteredRestaurants = filteredRestaurants.filter(restaurant =>
+      restaurant.categories?.some(category =>
+        category.toLowerCase() === categoryName.toLowerCase()
+      )
+    );
+  }
 
-    case "Price: Low":
-      // Chưa có dữ liệu giá nhà hàng
-      break;
-
-    default:
-      break;
+  if (selectedFilter === "Top Rated") {
+    filteredRestaurants = filteredRestaurants.filter(
+      restaurant => restaurant.rating >= 4.9
+    );
   }
 
   return (
-    <SafeAreaView
-      style={commonStyles.screen}
-      edges={["top", "bottom"]}
-    >
-      <BackHeader
-        title={title}
-        subtitle={`${filteredRestaurants.length} restaurants`}
-        rightIcon="tune"
-        onRightPress={() => {}}
-      />
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={
-          commonStyles.scrollContainer
-        }
-      >
+    <SafeAreaView style={commonStyles.screen} edges={["top", "bottom"]}>
+      <BackHeader title={categoryName || "Restaurants"} subtitle={`${filteredRestaurants.length} restaurants`} />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={commonStyles.scrollContainer}>
         <View style={homeStyles.filterContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          >
-            {filters.map((filter) => (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {filters.map(filter => (
               <FilterChip
                 key={filter}
                 title={filter}
-                selected={
-                  selectedFilter === filter
-                }
-                onPress={() =>
-                  setSelectedFilter(filter)
-                }
+                selected={selectedFilter === filter}
+                onPress={() => setSelectedFilter(filter)}
               />
             ))}
           </ScrollView>
         </View>
 
-        {filteredRestaurants.length === 0 ? (
-          <View
-            style={{
-              paddingVertical: 40,
-              alignItems: "center",
-            }}
-          >
-            <Text>
-              No restaurants found.
-            </Text>
-          </View>
-        ) : (
-          filteredRestaurants.map((restaurant) => (
-            <RestaurantListCard
-              key={restaurant.id}
-              item={restaurant}
-              onPress={() =>
-               navigation.navigate(
-                  "RestaurantDetail",
-                  {
-                    slug: restaurant.slug,
-                  }
-                )
-              }
-            />
-          ))
-        )}
+        {loading ?
+          <ActivityIndicator size="large" />
+          :
+          filteredRestaurants.length === 0 ?
+            <View style={{ paddingVertical: 40, alignItems: "center" }}>
+              <Text>No restaurants found.</Text>
+            </View>
+            :
+            filteredRestaurants.map(restaurant => (
+              <RestaurantListCard
+                key={restaurant.id}
+                item={restaurant}
+                onPress={() => navigation.navigate("RestaurantDetail", { restaurantId: restaurant.id })}
+              />
+            ))
+        }
       </ScrollView>
     </SafeAreaView>
   );

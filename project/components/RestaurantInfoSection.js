@@ -7,10 +7,8 @@ import RestaurantInfoRow from "./RestaurantInfoRow";
 import restaurantStyles from "../styles/restaurant";
 
 export default function RestaurantInfoSection({
-  restaurant, 
+  restaurant,
 }) {
-
-  const { info } = restaurant;
 
   return (
     <View style={restaurantStyles.infoSection}>
@@ -24,59 +22,53 @@ export default function RestaurantInfoSection({
         <RestaurantInfoRow
           icon="map-marker-outline"
           title="Address"
-          value={info.address}
+          value={restaurant.address}
         />
 
         <RestaurantInfoRow
           icon="phone-outline"
           title="Phone"
-          value={info.phone}
+          value={restaurant.phoneNumber}
         />
 
         <RestaurantInfoRow
           icon="email"
           title="Email"
-          value={info.email}
-        />
-
-        <RestaurantInfoRow
-          icon="web"
-          title="Website"
-          value={info.website}
+          value={restaurant.email}
         />
 
         <RestaurantInfoRow
           icon="clock-outline"
           title="Opening Hours"
-          value={info.openingHours}
+          value={`${restaurant.openTime} - ${restaurant.closeTime}`}
         />
 
         <RestaurantInfoRow
-          icon="credit-card-outline"
-          title="Payment"
-          value={info.paymentMethods.join(", ")}
+          icon="truck-delivery-outline"
+          title="Delivery Fee"
+          value={`$${restaurant.deliveryFee}`}
         />
 
         <RestaurantInfoRow
-          icon="room-service-outline"
-          title="Services"
-          value={info.services.join(", ")}
+          icon="star-outline"
+          title="Rating"
+          value={`${restaurant.rating} (${restaurant.totalReviews} reviews)`}
         />
 
         <RestaurantInfoRow
-          icon="car-outline"
-          title="Parking"
-          value={info.parking ? "Available" : "Unavailable"}
+          icon="food-outline"
+          title="Food Items"
+          value={`${restaurant.foodCount ?? 0} items`}
         />
 
         <RestaurantInfoRow
-          icon="wifi"
-          title="WiFi"
-          value={info.wifi ? "Available" : "Unavailable"}
+          icon="shape-outline"
+          title="Categories"
+          value={
+            restaurant.categories?.join(", ") ?? "No categories"
+          }
         />
-
       </View>
-
     </View>
   );
 }

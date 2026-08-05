@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Button, TextInput, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -35,13 +35,16 @@ export default function LoginScreen({ navigation }) {
 
       navigation.replace("MainTabs");
     } catch (err) {
-      const message = err.response?.data?.message || "Something went wrong. Please check your internet connection and try again.";
-         Alert.alert("Login Failed", message);
-    } finally {
-      setLoading(false);
+      console.log("FULL ERROR:", err);
+      console.log("STATUS:", err.response?.status);
+      console.log("DATA:", err.response?.data);
+
+      Alert.alert(
+        "Login Failed",
+        JSON.stringify(err.response?.data || err.message)
+      );
     }
   };
-
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
@@ -76,6 +79,15 @@ export default function LoginScreen({ navigation }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const check = async () => {
+      const token = await getToken();
+      console.log("TOKEN:", token);
+    };
+
+    check();
+  }, []);
 
   return (
     <SafeAreaView style={[commonStyles.screen, commonStyles.container, commonStyles.centerContainer]} edges={["top"]}>
