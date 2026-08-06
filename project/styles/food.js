@@ -1,17 +1,9 @@
 import { StyleSheet } from "react-native";
-import {
-  COLORS,
-  FONT,
-  SPACING,
-  RADIUS,
-  SHADOW,
-} from "./theme";
+import { COLORS, FONT, SPACING, RADIUS, SHADOW } from "./theme";
 
 const foodStyles = StyleSheet.create({
 
-  // ==========================
   // HERO
-  // ==========================
 
   heroImage: {
     width: "100%",
@@ -29,9 +21,7 @@ const foodStyles = StyleSheet.create({
     paddingBottom: SPACING.xxxl,
   },
 
-  // ==========================
   // TITLE
-  // ==========================
 
   name: {
     marginTop: SPACING.sm,
@@ -44,9 +34,24 @@ const foodStyles = StyleSheet.create({
 
   infoRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
 
     marginTop: SPACING.md,
+  },
+
+  infoChip: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+
+    backgroundColor: COLORS.background,
+
+    borderRadius: RADIUS.pill,
+
+    ...SHADOW,
   },
 
   dot: {
@@ -61,13 +66,15 @@ const foodStyles = StyleSheet.create({
   },
 
   infoText: {
+    marginLeft: SPACING.xs,
+
     fontSize: FONT.small,
-    color: COLORS.text,
+    fontWeight: "600",
+
+    color: COLORS.heading,
   },
 
-  // ==========================
   // RESTAURANT
-  // ==========================
 
   restaurantRow: {
     flexDirection: "row",
@@ -79,8 +86,10 @@ const foodStyles = StyleSheet.create({
   restaurantName: {
     marginLeft: SPACING.sm,
 
+    flex: 1,
+
     fontSize: FONT.body,
-    fontWeight: "600",
+    fontWeight: "700",
 
     color: COLORS.heading,
   },
@@ -95,14 +104,14 @@ const foodStyles = StyleSheet.create({
   categoryText: {
     marginLeft: SPACING.sm,
 
+    flex: 1,
+
     fontSize: FONT.small,
 
     color: COLORS.text,
   },
 
-  // ==========================
   // PRICE
-  // ==========================
 
   priceRow: {
     flexDirection: "row",
@@ -288,7 +297,6 @@ const foodStyles = StyleSheet.create({
 
     color: COLORS.primaryDark,
   },
-
 });
 
 export default foodStyles;

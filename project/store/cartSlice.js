@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import {
   getCart,
@@ -6,13 +6,13 @@ import {
   updateCart,
   deleteCartItem,
   clearCart,
-} from '../services/cartService';
+} from "../services/cartService";
 
 // =====================================
 // GET CART
 // =====================================
 
-export const fetchCart = createAsyncThunk('cart/fetchCart', async () => {
+export const fetchCart = createAsyncThunk("cart/fetchCart", async () => {
   return await getCart();
 });
 
@@ -21,14 +21,14 @@ export const fetchCart = createAsyncThunk('cart/fetchCart', async () => {
 // =====================================
 
 export const addCartItem = createAsyncThunk(
-  'cart/addCartItem',
+  "cart/addCartItem",
   async ({ foodId, quantity }, { dispatch }) => {
     await addToCart({
       foodId,
       quantity,
     });
 
-    dispatch(fetchCart());
+    await dispatch(fetchCart());
   },
 );
 
@@ -37,14 +37,14 @@ export const addCartItem = createAsyncThunk(
 // =====================================
 
 export const updateCartItem = createAsyncThunk(
-  'cart/updateCartItem',
+  "cart/updateCartItem",
   async ({ id, quantity }, { dispatch }) => {
     await updateCart({
       id,
       quantity,
     });
 
-    dispatch(fetchCart());
+    await dispatch(fetchCart());
   },
 );
 
@@ -53,11 +53,11 @@ export const updateCartItem = createAsyncThunk(
 // =====================================
 
 export const removeCartItem = createAsyncThunk(
-  'cart/removeCartItem',
+  "cart/removeCartItem",
   async (id, { dispatch }) => {
     await deleteCartItem(id);
 
-    dispatch(fetchCart());
+    await dispatch(fetchCart());
   },
 );
 
@@ -66,50 +66,55 @@ export const removeCartItem = createAsyncThunk(
 // =====================================
 
 export const clearCartAsync = createAsyncThunk(
-  'cart/clearCartAsync',
+  "cart/clearCartAsync",
   async (_, { dispatch }) => {
     await clearCart();
 
-    dispatch(fetchCart());
+    await dispatch(fetchCart());
   },
 );
 
 const initialState = {
   items: [],
 
-  status: 'idle',
+  status: "idle",
 
   error: null,
 };
 
 const cartSlice = createSlice({
-  name: 'cart',
+  name: "cart",
 
   initialState,
 
-  reducers: {},
+  reducers: {
+    clearCartState(state) {
+      state.items = [];
+      state.status = "idle";
+      state.error = null;
+    },
+  },
 
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder
 
       // ============================
       // FETCH
       // ============================
 
-      .addCase(fetchCart.pending, state => {
-        state.status = 'loading';
+      .addCase(fetchCart.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
       })
 
       .addCase(fetchCart.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-
+        state.status = "succeeded";
         state.items = action.payload;
-
         state.error = null;
       })
 
       .addCase(fetchCart.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
 
         state.error = action.error.message;
       })
@@ -118,16 +123,18 @@ const cartSlice = createSlice({
       // ADD
       // ============================
 
-      .addCase(addCartItem.pending, state => {
-        state.status = 'loading';
+      .addCase(addCartItem.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
       })
 
-      .addCase(addCartItem.fulfilled, state => {
-        state.status = 'succeeded';
+      .addCase(addCartItem.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
       })
 
       .addCase(addCartItem.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
 
         state.error = action.error.message;
       })
@@ -136,16 +143,18 @@ const cartSlice = createSlice({
       // UPDATE
       // ============================
 
-      .addCase(updateCartItem.pending, state => {
-        state.status = 'loading';
+      .addCase(updateCartItem.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
       })
 
-      .addCase(updateCartItem.fulfilled, state => {
-        state.status = 'succeeded';
+      .addCase(updateCartItem.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
       })
 
       .addCase(updateCartItem.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
 
         state.error = action.error.message;
       })
@@ -154,16 +163,18 @@ const cartSlice = createSlice({
       // DELETE
       // ============================
 
-      .addCase(removeCartItem.pending, state => {
-        state.status = 'loading';
+      .addCase(removeCartItem.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
       })
 
-      .addCase(removeCartItem.fulfilled, state => {
-        state.status = 'succeeded';
+      .addCase(removeCartItem.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
       })
 
       .addCase(removeCartItem.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
 
         state.error = action.error.message;
       })
@@ -172,20 +183,23 @@ const cartSlice = createSlice({
       // CLEAR
       // ============================
 
-      .addCase(clearCartAsync.pending, state => {
-        state.status = 'loading';
+      .addCase(clearCartAsync.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
       })
 
-      .addCase(clearCartAsync.fulfilled, state => {
-        state.status = 'succeeded';
+      .addCase(clearCartAsync.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
       })
 
       .addCase(clearCartAsync.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
 
         state.error = action.error.message;
       });
   },
 });
+export const { clearCartState } = cartSlice.actions;
 
 export default cartSlice.reducer;

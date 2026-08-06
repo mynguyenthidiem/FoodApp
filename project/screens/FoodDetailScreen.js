@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,49 +7,55 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import {
   SafeAreaView,
   useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+} from "react-native-safe-area-context";
 
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
-import homeStyles from '../styles/home';
-import commonStyles from '../styles/common';
-import foodDetailStyles from '../styles/food';
+import homeStyles from "../styles/home";
+import commonStyles from "../styles/common";
+import foodDetailStyles from "../styles/food";
 
-import RestaurantActionBar from '../components/RestaurantActionBar';
-import RestaurantBadge from '../components/RestaurantBadge';
-import RestaurantSectionTitle from '../components/RestaurantSectionTitle';
-import CustomButton from '../components/CustomButton';
+import RestaurantActionBar from "../components/RestaurantActionBar";
+import RestaurantBadge from "../components/RestaurantBadge";
+import RestaurantSectionTitle from "../components/RestaurantSectionTitle";
+import CustomButton from "../components/CustomButton";
 
-import { COLORS } from '../styles/theme';
-import { resolveImage } from '../utils/imageUrl';
+import { COLORS } from "../styles/theme";
+import { resolveImage } from "../utils/imageUrl";
 import {
   fetchFoodById,
   fetchFoodsByCategory,
   clearFoodDetail,
-} from '../store/foodSlice';
-import { toggleFavorite } from '../store/favoriteSlice';
-import { addCartItem } from '../store/cartSlice';
+} from "../store/foodSlice";
+import { toggleFavorite } from "../store/favoriteSlice";
+import { addCartItem } from "../store/cartSlice";
+import {
+  fetchRestaurantById,
+  clearRestaurantDetail,
+} from "../store/restaurantSlice";
 
 export default function FoodDetailScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
   const { food, relatedFoods, status, error } = useSelector(
-    state => state.food,
+    (state) => state.food,
   );
+
+  const { restaurant } = useSelector((state) => state.restaurant);
 
   const { foodId } = route.params || {};
 
-  const favoriteIds = useSelector(state => state.favorite.items);
+  const favoriteIds = useSelector((state) => state.favorite.items);
   const favorite = favoriteIds.includes(foodId);
 
   const [quantity, setQuantity] = useState(1);
 
-  if (status === 'loading' && !food) {
+  if (status === "loading" && !food) {
     return (
       <SafeAreaView style={commonStyles.screen}>
         <View style={[commonStyles.centerContainer, { flex: 1 }]}>
@@ -66,11 +72,11 @@ export default function FoodDetailScreen({ navigation, route }) {
       </SafeAreaView>
     );
   }
-  if (status === 'failed') {
+  if (status === "failed") {
     return (
       <SafeAreaView style={commonStyles.screen}>
         <View style={[commonStyles.centerContainer, { flex: 1 }]}>
-          <Text>{error ?? 'Unable to load food.'}</Text>
+          <Text>{error ?? "Unable to load food."}</Text>
         </View>
       </SafeAreaView>
     );
@@ -91,11 +97,11 @@ export default function FoodDetailScreen({ navigation, route }) {
   }, [food, quantity]);
 
   const handleIncrease = () => {
-    setQuantity(q => q + 1);
+    setQuantity((q) => q + 1);
   };
 
   const handleDecrease = () => {
-    setQuantity(q => Math.max(1, q - 1));
+    setQuantity((q) => Math.max(1, q - 1));
   };
 
   const handleFavorite = () => {
@@ -116,7 +122,7 @@ export default function FoodDetailScreen({ navigation, route }) {
         }),
       ).unwrap();
 
-      navigation.navigate('Cart');
+      navigation.navigate("Cart");
     } catch (err) {
       console.log(err);
     }
@@ -142,8 +148,28 @@ export default function FoodDetailScreen({ navigation, route }) {
     );
   }, [dispatch, food?.categoryId]);
 
+  useEffect(() => {
+    if (!food?.restaurantId) return;
+
+    dispatch(fetchRestaurantById(food.restaurantId));
+
+    return () => {
+      dispatch(clearRestaurantDetail());
+    };
+  }, [dispatch, food?.restaurantId]);
+
+  const restaurantStatus = restaurant?.isActive ? "Open" : "Closed";
+
+  const rating = restaurant?.rating ?? 0;
+
+  const deliveryFee = restaurant?.deliveryFee ?? 0;
+
+  const deliveryTime = restaurant?.deliveryTime ?? "N/A";
+
+  const address = restaurant?.address ?? "";
+
   return (
-    <SafeAreaView style={commonStyles.screen} edges={['bottom']}>
+    <SafeAreaView style={commonStyles.screen} edges={["bottom"]}>
       <RestaurantActionBar
         top={insets.top}
         favorite={favorite}
@@ -162,20 +188,61 @@ export default function FoodDetailScreen({ navigation, route }) {
           resizeMode="cover"
         />
         <View style={foodDetailStyles.content}>
-          <RestaurantBadge text={food.status} />
-          <Text style={foodDetailStyles.name}> {food.name} </Text>
-          <View style={foodDetailStyles.infoRow}></View>
+          <RestaurantBadge text={restaurantStatus} />
 
-          {!!food.restaurantName && (
+          <Text style={foodDetailStyles.name}>{food.name}</Text>
+
+          <View style={foodDetailStyles.infoRow}>
+            <View style={foodDetailStyles.infoChip}>
+              <MaterialCommunityIcons name="star" size={16} color="#FFC107" />
+
+              <Text style={foodDetailStyles.infoText}>{rating}</Text>
+            </View>
+
+            <View style={foodDetailStyles.infoChip}>
+              <MaterialCommunityIcons
+                name="clock-outline"
+                size={16}
+                color={COLORS.primary}
+              />
+
+              <Text style={foodDetailStyles.infoText}>{deliveryTime}</Text>
+            </View>
+
+            <View style={foodDetailStyles.infoChip}>
+              <MaterialCommunityIcons
+                name="bike-fast"
+                size={16}
+                color={COLORS.primary}
+              />
+
+              <Text style={foodDetailStyles.infoText}>${deliveryFee}</Text>
+            </View>
+          </View>
+
+          {!!restaurant && (
             <View style={foodDetailStyles.restaurantRow}>
               <MaterialCommunityIcons
                 name="storefront-outline"
                 size={18}
                 color={COLORS.primary}
               />
+
               <Text style={foodDetailStyles.restaurantName}>
-                {food.restaurantName}{' '}
+                {restaurant.name}
               </Text>
+            </View>
+          )}
+
+          {!!address && (
+            <View style={foodDetailStyles.categoryRow}>
+              <MaterialCommunityIcons
+                name="map-marker-outline"
+                size={18}
+                color={COLORS.primary}
+              />
+
+              <Text style={foodDetailStyles.categoryText}>{address}</Text>
             </View>
           )}
 
@@ -186,9 +253,9 @@ export default function FoodDetailScreen({ navigation, route }) {
                 size={18}
                 color={COLORS.primary}
               />
+
               <Text style={foodDetailStyles.categoryText}>
-                {' '}
-                {food.categoryName}{' '}
+                {food.categoryName}
               </Text>
             </View>
           )}
@@ -199,7 +266,7 @@ export default function FoodDetailScreen({ navigation, route }) {
           </View>
           <RestaurantSectionTitle title="Description" />
           <Text style={foodDetailStyles.description}>
-            {food.description || 'No description available.'}
+            {food.description || "No description available."}
           </Text>
           <View style={foodDetailStyles.infoCard}>
             <View style={foodDetailStyles.infoItem}>
@@ -210,7 +277,7 @@ export default function FoodDetailScreen({ navigation, route }) {
               />
               <Text style={foodDetailStyles.infoLabel}>Category</Text>
               <Text style={foodDetailStyles.infoValue}>
-                {food.categoryName ?? 'N/A'}
+                {food.categoryName ?? "N/A"}
               </Text>
             </View>
             <View style={foodDetailStyles.infoDivider} />
@@ -256,8 +323,8 @@ export default function FoodDetailScreen({ navigation, route }) {
             <View style={foodDetailStyles.summaryRow}>
               <Text style={foodDetailStyles.summaryLabel}> Item Price </Text>
               <Text style={foodDetailStyles.summaryValue}>
-                {' '}
-                ${Number(food.price || 0).toFixed(2)}{' '}
+                {" "}
+                ${Number(food.price || 0).toFixed(2)}{" "}
               </Text>
             </View>
             <View style={foodDetailStyles.summaryRow}>
@@ -267,8 +334,8 @@ export default function FoodDetailScreen({ navigation, route }) {
             <View style={foodDetailStyles.totalRow}>
               <Text style={foodDetailStyles.totalLabel}> Total </Text>
               <Text style={foodDetailStyles.totalValue}>
-                {' '}
-                ${totalPrice.toFixed(2)}{' '}
+                {" "}
+                ${totalPrice.toFixed(2)}{" "}
               </Text>
             </View>
           </View>
@@ -282,14 +349,14 @@ export default function FoodDetailScreen({ navigation, route }) {
               <FlatList
                 horizontal
                 data={relatedFoods}
-                keyExtractor={item => String(item.id)}
+                keyExtractor={(item) => String(item.id)}
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     activeOpacity={0.85}
                     style={homeStyles.foodCard}
                     onPress={() =>
-                      navigation.push('FoodDetail', {
+                      navigation.push("FoodDetail", {
                         foodId: item.id,
                       })
                     }
@@ -307,8 +374,8 @@ export default function FoodDetailScreen({ navigation, route }) {
                         <MaterialCommunityIcons
                           name={
                             favoriteIds.includes(item.id)
-                              ? 'heart'
-                              : 'heart-outline'
+                              ? "heart"
+                              : "heart-outline"
                           }
                           size={18}
                           color={COLORS.primary}
@@ -327,7 +394,7 @@ export default function FoodDetailScreen({ navigation, route }) {
                       <TouchableOpacity
                         style={homeStyles.addButton}
                         onPress={() => {
-                          navigation.push('FoodDetail', {
+                          navigation.push("FoodDetail", {
                             foodId: item.id,
                           });
                         }}

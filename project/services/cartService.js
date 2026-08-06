@@ -27,7 +27,7 @@ export const addToCart = async ({ foodId, quantity }) => {
 // UPDATE CART
 // ==============================
 
-export const updateCart = async ({ id, quantity }) => {
+export const updateCartItem = async ({ id, quantity }) => {
   const response = await api.put(`/cart/${id}`, {
     quantity,
   });
@@ -39,7 +39,7 @@ export const updateCart = async ({ id, quantity }) => {
 // DELETE ITEM
 // ==============================
 
-export const deleteCartItem = async id => {
+export const removeCartItem = async id => {
   const response = await api.delete(`/cart/${id}`);
 
   return response.data;

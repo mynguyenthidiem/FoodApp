@@ -1,15 +1,20 @@
-import api from "./client";
+import {
+  getAllRestaurants as getAllRestaurantsApi,
+  getRestaurantById as getRestaurantByIdApi,
+} from "../api/restaurantApi";
 
-export const getRestaurants = async (
-  pageNumber = 1,
-  pageSize = 20
-) => {
-  const response = await api.get("/Restaurant", {
-    params: {
-      pageNumber,
-      pageSize,
-    },
-  });
+// GET ALL
+
+export const getAllRestaurants = async (pageNumber = 1, pageSize = 20) => {
+  const response = await getAllRestaurantsApi();
+
+  return response.data;
+};
+
+// GET DETAIL
+
+export const getRestaurantById = async (id) => {
+  const response = await getRestaurantByIdApi(id);
 
   return response.data;
 };
