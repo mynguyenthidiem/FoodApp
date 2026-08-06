@@ -140,7 +140,9 @@ export default function CategoryScreen({ navigation }) {
                   subtitle: section.featured.description || "Food Category",
                   image: section.featured.image,
                 }}
-                onPress={() => { }}
+                onPress={() => navigation.navigate("RestaurantList", {
+                  category: section.featured,
+                })}
               />
 
 
@@ -157,7 +159,9 @@ export default function CategoryScreen({ navigation }) {
                         subtitle: category.description || "Food Category",
                         image: category.image,
                       }}
-                      onPress={() => { }}
+                      onPress={() => navigation.navigate("RestaurantList", {
+                        category: category,
+                      })}
                     />
 
                   ))}
