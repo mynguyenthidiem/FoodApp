@@ -16,6 +16,7 @@ export default function RestaurantHeroCard({
   restaurant,
   onBackPress,
 }) {
+  const formatTime = (time) => time?.slice(0, 5);
   return (
     <View style={restaurantStyles.heroCard}>
       <Image
@@ -43,7 +44,7 @@ export default function RestaurantHeroCard({
         </View>
 
         <Text style={restaurantStyles.heroCuisine}>
-          {restaurant.cuisine}
+          {restaurant.categories?.slice(0, 3).join(" • ")}
         </Text>
 
         <View style={restaurantStyles.heroInfoRow}>
@@ -54,7 +55,7 @@ export default function RestaurantHeroCard({
               size={16}
             />
             <Text style={restaurantStyles.heroInfoText}>
-              {restaurant.delivery?.time}
+              {formatTime(restaurant.openTime)} - {formatTime(restaurant.closeTime)}
             </Text>
           </View>
 
@@ -64,7 +65,7 @@ export default function RestaurantHeroCard({
               size={16}
             />
             <Text style={restaurantStyles.heroInfoText}>
-              {restaurant.delivery?.fee}
+              ${restaurant.deliveryFee ?? 0}
             </Text>
           </View>
 
@@ -73,8 +74,11 @@ export default function RestaurantHeroCard({
               name="map-marker-outline"
               size={16}
             />
-            <Text style={restaurantStyles.heroInfoText}>
-              {restaurant.delivery?.distance}
+            <Text
+              style={restaurantStyles.heroInfoText}
+              numberOfLines={1}
+            >
+              {restaurant.address ?? "No address"}
             </Text>
           </View>
 

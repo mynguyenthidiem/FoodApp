@@ -14,7 +14,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import homeStyles from "../styles/home";
 import commonStyles from "../styles/common";
@@ -42,41 +42,107 @@ import {
 export default function FoodDetailScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
+
   const { food, relatedFoods, status, error } = useSelector(
-    (state) => state.food,
+    (state) => state.food
   );
 
-  const { restaurant } = useSelector((state) => state.restaurant);
+  const { restaurant } = useSelector(
+    (state) => state.restaurant
+  );
 
   const { foodId } = route.params || {};
 
-  const favoriteIds = useSelector((state) => state.favorite.items);
+  const favoriteIds = useSelector(
+    (state) => state.favorite.items
+  );
+
   const favorite = favoriteIds.includes(foodId);
 
   const [quantity, setQuantity] = useState(1);
+
+  // ==========================
+  // ALL HOOKS FIRST
+  // ==========================
+
+  const totalPrice = useMemo(() => {
+    return Number(food?.price ?? 0) * quantity;
+  }, [food, quantity]);
+
+  useEffect(() => {
+    if (!foodId) return;
+
+    dispatch(fetchFoodById(foodId));
+
+    return () => {
+      dispatch(clearFoodDetail());
+    };
+  }, [dispatch, foodId]);
+
+  useEffect(() => {
+    if (!food?.categoryId) return;
+
+    dispatch(
+      fetchFoodsByCategory({
+        categoryId: food.categoryId,
+        pageNumber: 1,
+        pageSize: 10,
+      })
+    );
+  }, [dispatch, food?.categoryId]);
+
+  useEffect(() => {
+    if (!food?.restaurantId) return;
+
+    dispatch(fetchRestaurantById(food.restaurantId));
+
+    return () => {
+      dispatch(clearRestaurantDetail());
+    };
+  }, [dispatch, food?.restaurantId]);
+
+  // reset quantity khi mở món khác
+  useEffect(() => {
+    setQuantity(1);
+  }, [foodId]);
+
+  // ==========================
+  // DEBUG LOG
+  // ==========================
+
+  useEffect(() => {
+    console.log("foodId:", foodId);
+    console.log("status:", status);
+    console.log("food:", food);
+  }, [foodId, status, food]);
+
+  // ==========================
+  // EARLY RETURNS
+  // ==========================
 
   if (status === "loading" && !food) {
     return (
       <SafeAreaView style={commonStyles.screen}>
         <View style={[commonStyles.centerContainer, { flex: 1 }]}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-
-          <Text
-            style={{
-              marginTop: 12,
-            }}
-          >
+          <ActivityIndicator
+            size="large"
+            color={COLORS.primary}
+          />
+          <Text style={{ marginTop: 12 }}>
             Loading...
           </Text>
         </View>
       </SafeAreaView>
     );
   }
+
   if (status === "failed") {
     return (
       <SafeAreaView style={commonStyles.screen}>
         <View style={[commonStyles.centerContainer, { flex: 1 }]}>
-          <Text>{error ?? "Unable to load food."}</Text>
+          <Text>
+            {error ?? "Unable to load food."}
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -92,90 +158,14 @@ export default function FoodDetailScreen({ navigation, route }) {
     );
   }
 
-  const totalPrice = useMemo(() => {
-    return Number(food?.price ?? 0) * quantity;
-  }, [food, quantity]);
-
-  const handleIncrease = () => {
-    setQuantity((q) => q + 1);
-  };
-
-  const handleDecrease = () => {
-    setQuantity((q) => Math.max(1, q - 1));
-  };
-
-  const handleFavorite = () => {
-    dispatch(toggleFavorite(food.id));
-  };
-
-  const handleShare = () => {
-    // Expo Snack:
-    // sau này dùng Share API
-  };
-
-  const handleAddToCart = async () => {
-    try {
-      await dispatch(
-        addCartItem({
-          foodId: food.id,
-          quantity,
-        }),
-      ).unwrap();
-
-      navigation.navigate("Cart");
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  useEffect(() => {
-    if (!foodId) return;
-    dispatch(fetchFoodById(foodId));
-    return () => {
-      dispatch(clearFoodDetail());
-    };
-  }, [dispatch, foodId]);
-
-  useEffect(() => {
-    if (!food?.categoryId) return;
-
-    dispatch(
-      fetchFoodsByCategory({
-        categoryId: food.categoryId,
-        pageNumber: 1,
-        pageSize: 10,
-      }),
-    );
-  }, [dispatch, food?.categoryId]);
-
-  useEffect(() => {
-    if (!food?.restaurantId) return;
-
-    dispatch(fetchRestaurantById(food.restaurantId));
-
-    return () => {
-      dispatch(clearRestaurantDetail());
-    };
-  }, [dispatch, food?.restaurantId]);
-
-  const restaurantStatus = restaurant?.isActive ? "Open" : "Closed";
-
-  const rating = restaurant?.rating ?? 0;
-
-  const deliveryFee = restaurant?.deliveryFee ?? 0;
-
-  const deliveryTime = restaurant?.deliveryTime ?? "N/A";
-
-  const address = restaurant?.address ?? "";
-
   return (
     <SafeAreaView style={commonStyles.screen} edges={["bottom"]}>
       <RestaurantActionBar
         top={insets.top}
         favorite={favorite}
         onBackPress={() => navigation.goBack()}
-        onFavoritePress={handleFavorite}
-        onSharePress={handleShare}
+        onFavoritePress={() => dispatch(toggleFavorite(food.id))}
+        onSharePress={() => { }}
       />
 
       <ScrollView
@@ -188,15 +178,22 @@ export default function FoodDetailScreen({ navigation, route }) {
           resizeMode="cover"
         />
         <View style={foodDetailStyles.content}>
-          <RestaurantBadge text={restaurantStatus} />
-
+         <RestaurantBadge
+  text={
+    restaurant
+      ? restaurant.isActive
+        ? "Open"
+        : "Closed"
+      : "Loading..."
+  }
+/> 
           <Text style={foodDetailStyles.name}>{food.name}</Text>
 
           <View style={foodDetailStyles.infoRow}>
             <View style={foodDetailStyles.infoChip}>
               <MaterialCommunityIcons name="star" size={16} color="#FFC107" />
 
-              <Text style={foodDetailStyles.infoText}>{rating}</Text>
+              <Text style={foodDetailStyles.infoText}>{restaurant?.rating}</Text>
             </View>
 
             <View style={foodDetailStyles.infoChip}>
@@ -206,7 +203,7 @@ export default function FoodDetailScreen({ navigation, route }) {
                 color={COLORS.primary}
               />
 
-              <Text style={foodDetailStyles.infoText}>{deliveryTime}</Text>
+              <Text style={foodDetailStyles.infoText}>{restaurant?.deliveryTime}</Text>
             </View>
 
             <View style={foodDetailStyles.infoChip}>
@@ -216,7 +213,7 @@ export default function FoodDetailScreen({ navigation, route }) {
                 color={COLORS.primary}
               />
 
-              <Text style={foodDetailStyles.infoText}>${deliveryFee}</Text>
+              <Text style={foodDetailStyles.infoText}>${restaurant?.deliveryFee}</Text>
             </View>
           </View>
 
@@ -234,7 +231,6 @@ export default function FoodDetailScreen({ navigation, route }) {
             </View>
           )}
 
-          {!!address && (
             <View style={foodDetailStyles.categoryRow}>
               <MaterialCommunityIcons
                 name="map-marker-outline"
@@ -242,9 +238,8 @@ export default function FoodDetailScreen({ navigation, route }) {
                 color={COLORS.primary}
               />
 
-              <Text style={foodDetailStyles.categoryText}>{address}</Text>
+              <Text style={foodDetailStyles.categoryText}>{restaurant?.address}</Text>
             </View>
-          )}
 
           {!!food.categoryName && (
             <View style={foodDetailStyles.categoryRow}>
@@ -297,7 +292,7 @@ export default function FoodDetailScreen({ navigation, route }) {
           <View style={foodDetailStyles.quantityCard}>
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={handleDecrease}
+              onPress={() => setQuantity((prev) => Math.max(prev - 1, 1))}
               style={foodDetailStyles.qtyButton}
             >
               <MaterialCommunityIcons
@@ -309,7 +304,7 @@ export default function FoodDetailScreen({ navigation, route }) {
             <Text style={foodDetailStyles.qtyNumber}> {quantity} </Text>
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={handleIncrease}
+              onPress={() => setQuantity((prev) => prev + 1)}
               style={foodDetailStyles.qtyButton}
             >
               <MaterialCommunityIcons
@@ -341,7 +336,7 @@ export default function FoodDetailScreen({ navigation, route }) {
           </View>
           <CustomButton
             title={`Add to Cart • $${totalPrice.toFixed(2)}`}
-            onPress={handleAddToCart}
+            onPress={()=>{navigation.navigate("Cart");dispatch(addCartItem({foodId:food.id,quantity}))}}
           />
           {relatedFoods.length > 0 && (
             <>

@@ -168,7 +168,7 @@ export default function HomeScreen({navigation}){
                   favorite:favoriteIds.includes(item.id),
                 }}
                 onFavoritePress={handleFavorite}
-                onPress={()=>navigation.navigate("FoodDetail",{food:item})}
+                onPress={()=>navigation.navigate("FoodDetail",{foodId:item.id})}
               />
             ))}
           </ScrollView>
