@@ -1,133 +1,157 @@
-import React,{useEffect,useState} from "react";
-import {ScrollView,View,ActivityIndicator} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
-import {useDispatch,useSelector} from "react-redux";
+import React, { useEffect, useState } from 'react';
+import { ScrollView, View, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
 
-import HomeHeader from "../components/HomeHeader";
-import BannerCard from "../components/BannerCard";
-import SearchBar from "../components/SearchBar";
-import SectionHeader from "../components/SectionHeader";
-import CategoryCard from "../components/CategoryCard";
-import RestaurantCard from "../components/RestaurantCard";
-import FoodCard from "../components/FoodCard";
+import HomeHeader from '../components/HomeHeader';
+import BannerCard from '../components/BannerCard';
+import SearchBar from '../components/SearchBar';
+import SectionHeader from '../components/SectionHeader';
+import CategoryCard from '../components/CategoryCard';
+import RestaurantCard from '../components/RestaurantCard';
+import FoodCard from '../components/FoodCard';
 
-import commonStyles from "../styles/common";
-import homeStyles from "../styles/home";
-import {COLORS} from "../styles/theme";
+import commonStyles from '../styles/common';
+import homeStyles from '../styles/home';
+import { COLORS } from '../styles/theme';
 
-import {homeHeader,banner} from "../data/homeData";
-import {resolveImage} from "../utils/imageUrl";
+import { homeHeader, banner } from '../data/homeData';
+import { resolveImage } from '../utils/imageUrl';
 
-import {getAllFoods} from "../api/foodApi";
-import {getSystemCategories} from "../api/categoryApi";
-import {getAllRestaurants} from "../api/restaurantApi";
+import { getFoods } from '../services/foodService';
+import { getSystemCategories } from '../services/categoryService';
+import { getAllRestaurants } from '../services/restaurantService';
 
-import {toggleFavorite} from "../store/favoriteSlice";
+import { toggleFavorite } from '../store/favoriteSlice';
 
-const CATEGORY_ICON_MAP={
-  mains:"silverware-fork-knife",
-  burger:"hamburger",
-  sides:"food",
-  drinks:"cup",
-  desserts:"ice-cream",
-  appetizers:"food",
-  bakery:"bread-slice",
-  cakes:"cake-variant",
-  coffee:"coffee",
-  salads:"leaf",
-  smoothies:"fruit-cherries",
+const CATEGORY_ICON_MAP = {
+  mains: 'silverware-fork-knife',
+  burger: 'hamburger',
+  sides: 'food',
+  drinks: 'cup',
+  desserts: 'ice-cream',
+  appetizers: 'food',
+  bakery: 'bread-slice',
+  cakes: 'cake-variant',
+  coffee: 'coffee',
+  salads: 'leaf',
+  smoothies: 'fruit-cherries',
 };
 
-function getCategoryIcon(name=""){
-  const key=name.trim().toLowerCase();
-  return CATEGORY_ICON_MAP[key]||"silverware-fork-knife";
+function getCategoryIcon(name = '') {
+  const key = name.trim().toLowerCase();
+
+  return CATEGORY_ICON_MAP[key] || 'silverware-fork-knife';
 }
 
-export default function HomeScreen({navigation}){
-  const dispatch=useDispatch();
+export default function HomeScreen({ navigation }) {
+  const dispatch = useDispatch();
 
-  const [foods,setFoods]=useState([]);
-  const [categories,setCategories]=useState([]);
-  const [restaurants,setRestaurants]=useState([]);
+  const [foods, setFoods] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [restaurants, setRestaurants] = useState([]);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [restaurantLoading, setRestaurantLoading] = useState(false);
+  const [foodLoading, setFoodLoading] = useState(false);
+  const favoriteIds = useSelector(state => state.favorite.items);
 
-  const [categoryLoading,setCategoryLoading]=useState(false);
-  const [restaurantLoading,setRestaurantLoading]=useState(false);
-  const [foodLoading,setFoodLoading]=useState(false);
+  // FAVORITE
 
-  const favoriteIds=useSelector(state=>state.favorite.items);
-
-  const handleFavorite=(item)=>{
+  const handleFavorite = item => {
     dispatch(toggleFavorite(item.id));
   };
 
-  const loadFoods=async()=>{
-    try{
+  // LOAD FOODS
+
+  const loadFoods = async () => {
+    try {
       setFoodLoading(true);
-      const response=await getAllFoods();
-      setFoods(response.data.items??[]);
-    }catch(error){
-      console.log("Load foods failed:",error);
-    }finally{
+
+      const response = await getFoods();
+
+      setFoods(response.items ?? []);
+    } catch (error) {
+      console.log('Load foods failed:', error);
+    } finally {
       setFoodLoading(false);
     }
   };
 
-  const loadCategories=async()=>{
-    try{
+  // LOAD CATEGORIES
+
+  const loadCategories = async () => {
+    try {
       setCategoryLoading(true);
-      const response=await getSystemCategories();
-      setCategories(response.data??[]);
-    }catch(error){
-      console.log("Load categories failed:",error);
-    }finally{
+
+      const response = await getSystemCategories();
+
+      setCategories(response ?? []);
+    } catch (error) {
+      console.log('Load categories failed:', error);
+    } finally {
       setCategoryLoading(false);
     }
   };
 
-  const loadRestaurants=async()=>{
-    try{
+  // LOAD RESTAURANTS
+
+  const loadRestaurants = async () => {
+    try {
       setRestaurantLoading(true);
-      const response=await getAllRestaurants();
-      setRestaurants(response.data.items??response.data??[]);
-    }catch(error){
-      console.log("Load restaurants failed:",error);
-    }finally{
+
+      const response = await getAllRestaurants();
+
+      setRestaurants(response.items ?? response ?? []);
+    } catch (error) {
+      console.log('Load restaurants failed:', error);
+    } finally {
       setRestaurantLoading(false);
     }
   };
 
-  useEffect(()=>{
+  // LOAD DATA
+
+  useEffect(() => {
     loadCategories();
     loadRestaurants();
     loadFoods();
-  },[]);
+  }, []);
 
-  return(
-    <SafeAreaView style={commonStyles.screen} edges={["top","left","right"]}>
-      <HomeHeader {...homeHeader}/>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={commonStyles.scrollContainer}>
+  return (
+    <SafeAreaView style={commonStyles.screen} edges={['top', 'left', 'right']}>
+      <HomeHeader {...homeHeader} />
 
-        <SearchBar editable={false} onPress={()=>navigation.navigate("Search")}/>
+      <ScrollView showsVerticalScrollIndicator={false}>
 
-        <BannerCard {...banner}/>
+        <SearchBar
+          editable={false}
+          onPress={() => navigation.navigate('Search')}
+        />
 
-        <SectionHeader title="Categories" buttonText="See All" onPress={()=>navigation.navigate("Category")}/>
+        <BannerCard {...banner} />
+
+        <SectionHeader
+          title="Categories"
+          buttonText="See All"
+          onPress={() => navigation.navigate('Category')}
+        />
 
         <View style={homeStyles.categoryList}>
-          {categoryLoading&&<ActivityIndicator color={COLORS.primary}/>}
-          {!categoryLoading&&(
+          {categoryLoading && <ActivityIndicator color={COLORS.primary} />}
+
+          {!categoryLoading && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {categories.map(item=>(
+              {categories.map(item => (
                 <CategoryCard
                   key={item.id}
                   item={{
                     ...item,
-                    icon:getCategoryIcon(item.name),
+                    icon: getCategoryIcon(item.name),
                   }}
-                  onPress={()=>
-                    navigation.navigate("RestaurantList",{
-                      categoryId:item.id,
-                      categoryName:item.name,
+                  onPress={() =>
+                    navigation.navigate('RestaurantList', {
+                      categoryId: item.id,
+                      categoryName: item.name,
                     })
                   }
                 />
@@ -136,44 +160,61 @@ export default function HomeScreen({navigation}){
           )}
         </View>
 
-        <SectionHeader title="Popular Restaurants" buttonText="See All" onPress={()=>navigation.navigate("RestaurantList",{type:"all",title:"Popular Restaurants"})}/>
+        <SectionHeader
+          title="Popular Restaurants"
+          buttonText="See All"
+          onPress={() =>
+            navigation.navigate('RestaurantList', {
+              type: 'all',
+              title: 'Popular Restaurants',
+            })
+          }
+        />
 
-        {restaurantLoading&&<ActivityIndicator color={COLORS.primary}/>}
+        {restaurantLoading && <ActivityIndicator color={COLORS.primary} />}
 
-        {!restaurantLoading&&restaurants.map(item=>(
-          <RestaurantCard
-            key={item.id}
-            image={resolveImage(item.imageUrl)}
-            name={item.name}
-            address={item.address}
-            rating={item.rating}
-            totalReviews={item.totalReviews}
-            deliveryFee={item.deliveryFee}
-            isActive={item.isActive}
-            onPress={()=>navigation.navigate("RestaurantDetail",{restaurantId:item.id})}
-          />
-        ))}
+        {!restaurantLoading &&
+          restaurants.map(item => (
+            <RestaurantCard
+              key={item.id}
+              image={resolveImage(item.imageUrl)}
+              name={item.name}
+              address={item.address}
+              rating={item.rating}
+              totalReviews={item.totalReviews}
+              deliveryFee={item.deliveryFee}
+              isActive={item.isActive}
+              onPress={() =>
+                navigation.navigate('RestaurantDetail', {
+                  restaurantId: item.id,
+                })
+              }
+            />
+          ))}
 
-        <SectionHeader title="Recommended for you" buttonText="See All"/>
+        <SectionHeader title="Recommended for you" buttonText="See All" />
 
-        {foodLoading&&<ActivityIndicator color={COLORS.primary}/>}
+        {foodLoading && <ActivityIndicator color={COLORS.primary} />}
 
-        {!foodLoading&&(
+        {!foodLoading && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {foods.map(item=>(
+            {foods.map(item => (
               <FoodCard
                 key={item.id}
                 item={{
                   ...item,
-                  favorite:favoriteIds.includes(item.id),
+                  favorite: favoriteIds.includes(item.id),
                 }}
                 onFavoritePress={handleFavorite}
-                onPress={()=>navigation.navigate("FoodDetail",{foodId:item.id})}
+                onPress={() =>
+                  navigation.navigate('FoodDetail', {
+                    foodId: item.id,
+                  })
+                }
               />
             ))}
           </ScrollView>
         )}
-
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,11 +1,13 @@
-import { configureStore } from "@reduxjs/toolkit";
-import cartReducer from "./cartSlice";
-import userReducer from "./userSlice";
-import orderReducer from "./orderSlice";
-import categoryReducer from "./categorySlice";
-import favoriteReducer from "./favoriteSlice";
-import foodReducer from "./foodSlice";
-import restaurantReducer from "./restaurantSlice";
+import { configureStore } from '@reduxjs/toolkit';
+
+import cartReducer from './cartSlice';
+import userReducer from './userSlice';
+import orderReducer from './orderSlice';
+import categoryReducer from './categorySlice';
+import favoriteReducer from './favoriteSlice';
+import foodReducer from './foodSlice';
+import restaurantReducer from './restaurantSlice';
+import reviewReducer from './reviewSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +18,6 @@ export const store = configureStore({
     favorite: favoriteReducer,
     food: foodReducer,
     restaurant: restaurantReducer,
+    review: reviewReducer,
   },
 });

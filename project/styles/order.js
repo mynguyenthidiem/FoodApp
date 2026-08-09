@@ -39,24 +39,6 @@ const orderStyles = StyleSheet.create({
     color: COLORS.heading,
   },
 
-  cartRestaurant: {
-    marginTop: SPACING.xs,
-
-    fontSize: FONT.caption,
-
-    color: COLORS.neutral,
-  },
-
-  cartBottomRow: {
-    flexDirection: "row",
-
-    justifyContent: "space-between",
-
-    alignItems: "center",
-
-    marginTop: SPACING.md,
-  },
-
   cartPrice: {
     fontSize: FONT.subtitle,
     fontWeight: "700",
@@ -64,68 +46,18 @@ const orderStyles = StyleSheet.create({
     color: COLORS.primaryDark,
   },
 
-  // Address
-
-  addressRow: {
+  //quantity
+  quantityRow: {
     flexDirection: "row",
-
-    alignItems: "flex-start",
-  },
-
-  addressContent: {
-    flex: 1,
-
-    marginLeft: SPACING.md,
-  },
-
-  addressTitle: {
-    fontSize: FONT.label,
-    fontWeight: "700",
-
-    color: COLORS.heading,
-  },
-
-  addressText: {
-    marginTop: SPACING.xs,
-
-    fontSize: FONT.small,
-
-    color: COLORS.text,
-
-    lineHeight: 20,
-  },
-
-  changeText: {
-    color: COLORS.primary,
-
-    fontWeight: "700",
-  },
-
-  // Coupon
-
-  couponRow: {
-    flexDirection: "row",
-
     alignItems: "center",
+    marginTop: SPACING.md,
   },
-
-  couponInput: {
-    flex: 1,
-
-    height: 48,
-
-    borderWidth: 1,
-    borderColor: COLORS.border,
-
-    borderRadius: RADIUS.md,
-
-    paddingHorizontal: SPACING.md,
-
-    backgroundColor: COLORS.background,
-
-    color: COLORS.heading,
-
+  qtyText: {
+    width: 42,
+    textAlign: "center",
     fontSize: FONT.body,
+    fontWeight: "700",
+    color: COLORS.heading,
   },
 
   // Empty
@@ -150,13 +82,9 @@ const orderStyles = StyleSheet.create({
 
   emptyText: {
     marginTop: SPACING.sm,
-
     textAlign: "center",
-
     fontSize: FONT.body,
-
     lineHeight: 24,
-
     color: COLORS.text,
   },
 });

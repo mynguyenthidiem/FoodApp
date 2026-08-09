@@ -1,14 +1,14 @@
-import React, {useState} from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
+import React, {useState} from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
-import commonStyles from "../styles/common";
-import onboardingStyles from "../styles/onboarding";
+import commonStyles from '../styles/common';
+import onboardingStyles from '../styles/onboarding';
 
-import onboardingData from "../data/onboardingData";
+import onboardingData from '../data/onboardingData';
 
-import OnboardingCard from "../components/OnboardingCard";
-import CustomButton from "../components/CustomButton";
+import OnboardingCard from '../components/OnboardingCard';
+import CustomButton from '../components/CustomButton';
 
 export default function OnboardingScreen({navigation}) {
   const [currentPage, setCurrentPage] = useState(0);
@@ -43,11 +43,11 @@ export default function OnboardingScreen({navigation}) {
                 if (currentPage < onboardingData.length - 1) {
                     setCurrentPage(currentPage + 1);
                 } else {
-                    navigation.navigate("MainTabs");
+                    navigation.replace("Login");
                 }
             }}
         />
-        <TouchableOpacity onPress={() => navigation.navigate("MainTabs")}>
+        <TouchableOpacity onPress={() => navigation.replace("Login")}>
             <Text style={onboardingStyles.skipText}> Skip </Text>
         </TouchableOpacity>
     </SafeAreaView>

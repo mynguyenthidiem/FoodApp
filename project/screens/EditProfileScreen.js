@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from 'react';
+
 import {
   ScrollView,
   View,
@@ -6,185 +7,263 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+  Alert,
+} from 'react-native';
 
-import BackHeader from "../components/BackHeader";
-import commonStyles from "../styles/common";
-import profileStyles from "../styles/profile";
-import { getProfile } from "../api/authApi";
-import { resolveImage } from "../utils/imageUrl";
-import { updateProfile } from "../api/userApi";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { launchImageLibrary } from "react-native-image-picker";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { COLORS } from "../styles/theme";
+import { useDispatch, useSelector } from 'react-redux';
+
+import BackHeader from '../components/BackHeader';
+
+import commonStyles from '../styles/common';
+import profileStyles from '../styles/profile';
+
+import { updateProfileAsync } from '../store/userSlice';
+
+import { resolveImage } from '../utils/imageUrl';
+
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+import { launchImageLibrary } from 'react-native-image-picker';
+
+import { COLORS } from '../styles/theme';
+
 const EditProfileScreen = ({ navigation }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
+  const dispatch = useDispatch();
+
+  // ======================================
+  // REDUX USER
+  // ======================================
+
+  const { currentUser, status, error } = useSelector(state => state.user);
+
+  // ======================================
+  // FORM STATE
+  // ======================================
+
+  const [fullName, setFullName] = useState('');
+
+  const [email, setEmail] = useState('');
+
+  const [phone, setPhone] = useState('');
+
+  const [address, setAddress] = useState('');
+
   const [avatar, setAvatar] = useState(null);
 
-  useEffect(() => {
-    if (user) {
-      setFullName(user.fullName ?? "");
-      setEmail(user.email ?? "");
-      setPhone(user.phone ?? "");
-      setAddress(user.address ?? "");
-    }
-  }, [user]);
-
-  const loadProfile = async () => {
-    try {
-      const response = await getProfile();
-      setUser(response.data);
-    } catch (error) {
-      console.warn("Load profile failed:", error?.response?.status);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ======================================
+  // LOAD USER INTO FORM
+  // ======================================
 
   useEffect(() => {
-    loadProfile();
-  }, []);
+    if (!currentUser) {
+      return;
+    }
+
+    setFullName(currentUser.fullName ?? '');
+
+    setEmail(currentUser.email ?? '');
+
+    setPhone(currentUser.phone ?? '');
+
+    setAddress(currentUser.address ?? '');
+  }, [currentUser]);
+
+  // ======================================
+  // SAVE PROFILE
+  // ======================================
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!currentUser) {
+      Alert.alert('Error', 'User information is not available.');
+      return;
+    }
+
+    if (!fullName.trim()) {
+      Alert.alert('Error', 'Full name is required.');
+      return;
+    }
 
     try {
-      const formData = new FormData();
-      formData.append("fullName", fullName);
-      formData.append("phone", phone);
-      formData.append("address", address);
-      if (avatar) {
-        formData.append("avatar", {
-          uri: avatar.uri,
-          name: avatar.fileName || "avatar.jpg",
-          type: avatar.type || "image/jpeg",
-        });
-      }
-      await updateProfile(user.id, formData);
+      await dispatch(
+        updateProfileAsync({
+          id: currentUser.id,
 
-      navigation.goBack();
+          fullName: fullName.trim(),
+
+          phone: phone.trim(),
+
+          address: address.trim(),
+
+          avatar,
+        }),
+      ).unwrap();
+
+      Alert.alert('Success', 'Profile updated successfully.', [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     } catch (error) {
-      console.log(error?.response?.data);
-      alert("Update failed");
+      console.log('Update profile failed:', error);
+
+      Alert.alert('Update Failed', error || 'Unable to update profile.');
     }
   };
+
+  // ======================================
+  // PICK AVATAR
+  // ======================================
 
   const pickImage = async () => {
     try {
       const result = await launchImageLibrary({
-        mediaType: "photo",
+        mediaType: 'photo',
         quality: 0.8,
       });
 
-      if (
-        !result.didCancel &&
-        result.assets &&
-        result.assets.length > 0
-      ) {
+      if (!result.didCancel && result.assets && result.assets.length > 0) {
         setAvatar(result.assets[0]);
       }
     } catch (error) {
-      console.log("Pick image error:", error);
+      console.log('Pick image error:', error);
+
+      Alert.alert('Error', 'Unable to select image.');
     }
   };
 
+  // ======================================
+  // RENDER
+  // ======================================
+
   return (
-    <SafeAreaView
-      style={commonStyles.screen}
-      edges={["top", "left", "right"]}
-    >
+    <SafeAreaView style={commonStyles.screen} edges={['top', 'left', 'right']}>
       <BackHeader title="Edit Profile" />
 
       <ScrollView
-        contentContainerStyle={
-          commonStyles.scrollContainer
-        }
-      ><View style={profileStyles.avatarEditContainer}>
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={commonStyles.scrollContainer}
+      >
+        <View style={profileStyles.avatarEditContainer}>
           <View style={profileStyles.editAvatarWrapper}>
             <Image
               source={
                 avatar
-                  ? { uri: avatar.uri }
-                  : resolveImage(user?.avatar)
+                  ? {
+                      uri: avatar.uri,
+                    }
+                  : resolveImage(currentUser?.avatar)
               }
               style={profileStyles.editAvatarImage}
             />
           </View>
+
           <TouchableOpacity
             style={profileStyles.editAvatarButton}
             onPress={pickImage}
+            activeOpacity={0.8}
           >
             <MaterialCommunityIcons
               name="camera"
               size={20}
-              color="#fff"
+              color={COLORS.white}
             />
           </TouchableOpacity>
         </View>
 
         <View style={profileStyles.editForm}>
-          <Text style={profileStyles.editFormLabel}>
-            Full Name
-          </Text>
+          <Text style={profileStyles.editFormLabel}>Full Name</Text>
 
           <TextInput
             style={profileStyles.editFormInput}
             value={fullName}
             onChangeText={setFullName}
+            placeholder="Enter your full name"
           />
         </View>
 
         <View style={profileStyles.editForm}>
-          <Text style={profileStyles.editFormLabel}>
-            Address
+          <Text style={profileStyles.editFormLabel}>Email Address</Text>
+
+          <TextInput
+            style={[
+              profileStyles.editFormInput,
+              {
+                backgroundColor: '#F2F2F2',
+                color: '#888888',
+              },
+            ]}
+            value={email}
+            editable={false}
+            selectTextOnFocus={false}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+
+          <Text
+            style={{
+              marginTop: 5,
+              fontSize: 12,
+              color: '#999999',
+            }}
+          >
+            Email address cannot be changed.
           </Text>
+        </View>
+
+        <View style={profileStyles.editForm}>
+          <Text style={profileStyles.editFormLabel}>Address</Text>
 
           <TextInput
             style={profileStyles.editFormInput}
             value={address}
             onChangeText={setAddress}
+            placeholder="Enter your address"
           />
         </View>
 
         <View style={profileStyles.editForm}>
-          <Text style={profileStyles.editFormLabel}>
-            Phone Number
-          </Text>
+          <Text style={profileStyles.editFormLabel}>Phone Number</Text>
 
           <TextInput
             style={profileStyles.editFormInput}
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
+            placeholder="Enter your phone number"
           />
         </View>
 
         <TouchableOpacity
-          style={profileStyles.saveButton}
+          style={[
+            profileStyles.saveButton,
+            status === 'loading' && {
+              opacity: 0.6,
+            },
+          ]}
           onPress={handleSave}
+          disabled={status === 'loading'}
+          activeOpacity={0.8}
         >
           <MaterialCommunityIcons
             name="content-save"
             size={20}
-            color="#fff"
+            color={COLORS.white}
           />
 
           <Text style={profileStyles.saveButtonText}>
-            Save Changes
+            {status === 'loading' ? 'Saving...' : 'Save Changes'}
           </Text>
         </TouchableOpacity>
+
         <Text style={profileStyles.accountManagement}>Account Management</Text>
+
         <TouchableOpacity
           style={profileStyles.deleteAccountButton}
-          onPress={() => {
-          }}
+          onPress={() => {}}
+          activeOpacity={0.8}
         >
           <MaterialCommunityIcons
             name="delete-outline"
