@@ -8,9 +8,11 @@ import favoriteReducer from './favoriteSlice';
 import foodReducer from './foodSlice';
 import restaurantReducer from './restaurantSlice';
 import reviewReducer from './reviewSlice';
+import authReducer from './authSlice';
 
 export const store = configureStore({
   reducer: {
+    auth: authReducer,
     cart: cartReducer,
     user: userReducer,
     order: orderReducer,

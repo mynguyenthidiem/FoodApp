@@ -16,7 +16,6 @@ export const getUserById = async (id) => {
 // PUT /api/User/profile/{id}
 // multipart/form-data
 // ======================================
-
 export const updateProfile = async ({
   id,
   fullName,
@@ -44,15 +43,6 @@ export const updateProfile = async ({
     });
   }
 
-  const response = await api.put(
-    `/User/profile/${id}`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-
+  const response = await api.put(`/User/profile/${id}`, formData);
   return response.data;
 };

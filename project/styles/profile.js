@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, SPACING, RADIUS } from './theme';
-
+import { COLORS, SPACING, RADIUS, SHADOW, SHADOW_SOFT } from './theme';
 const AVATAR_SIZE = 50;
 
 const styles = StyleSheet.create({
+
     profileCardContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -26,6 +26,12 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.secondary,
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden',
+    },
+    avatarImage: {
+        width: AVATAR_SIZE,
+        height: AVATAR_SIZE,
+        borderRadius: AVATAR_SIZE / 2,
     },
     name: {
         fontSize: 24,
@@ -185,6 +191,11 @@ const styles = StyleSheet.create({
     },
 
     // profile screen
+    header: {
+        alignItems: "center",
+        marginBottom: SPACING.l,
+        justifyContent: "center",
+    },
     avatarContainer: {
         width: 100,
         height: 100,
@@ -207,6 +218,9 @@ const styles = StyleSheet.create({
     profileScreenAvatar: {
         width: "100%",
         height: "100%",
+        borderWidth: 3,
+        borderColor: '#fff',
+        borderRadius: 50,
     },
 
     editAvatarButton: {
@@ -224,6 +238,52 @@ const styles = StyleSheet.create({
 
         zIndex: 10,
         elevation: 5,
+    },
+    stats: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderRadius: RADIUS.xl,
+        paddingVertical: SPACING.lg,
+        marginTop: SPACING.md,
+        marginBottom: SPACING.xxl,
+        gap: SPACING.sm,
+    },
+    statBox: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: COLORS.surface,
+        marginHorizontal: SPACING.sm,
+        paddingVertical: SPACING.md,
+        borderRadius: RADIUS.lg,
+        ...SHADOW_SOFT,
+    },
+    statNumber: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: COLORS.primaryDark,
+    },
+    statLabel: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: COLORS.neutral,
+        marginTop: 2,
+        letterSpacing: 0.5,
+    },
+    logoutButton: {
+        backgroundColor: COLORS.secondary,
+        paddingVertical: SPACING.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: RADIUS.xl,
+        marginTop: SPACING.xl,
+    },
+    logoutText: {
+        color: COLORS.error,
+        fontSize: 18,
+        fontWeight: 'bold',
+        paddingLeft: SPACING.md,
     },
 });
 

@@ -10,34 +10,21 @@ import SettingRow from '../components/SettingRow';
 import commonStyles from '../styles/common';
 import profileStyles from '../styles/profile';
 import { COLORS } from '../styles/theme';
-
-import { fetchCurrentUser, clearCurrentUser } from '../redux/userSlice';
+import BackHeader from '../components/BackHeader';
+import { fetchCurrentUser, clearCurrentUser } from '../store/userSlice';
 
 import { removeToken } from '../utils/tokenStorage';
 
 const SettingsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const [notification, setNotification] = useState(true);
+  const { user: authUser } = useSelector(state => state.auth);
   const { currentUser, status, error } = useSelector(state => state.user);
 
   useEffect(() => {
-    /*
-     * Nếu currentUser đã có trong Redux
-     * thì không cần gọi API lại.
-     *
-     * Nếu currentUser chưa có thì cần fetch.
-     *
-     * fetchCurrentUser() hiện tại yêu cầu ID.
-     * Vì vậy phần này chỉ chạy được khi
-     * currentUser đã có id từ Redux/login flow.
-     */
-
-    if (!currentUser) {
-      return;
+    if (!currentUser && authUser?.id) {
+      dispatch(fetchCurrentUser(authUser.id));
     }
-
-    // User đã có trong Redux → không cần fetch lại
-  }, [currentUser]);
+  }, [dispatch, currentUser, authUser?.id]);
 
 
   const handleSignOut = async () => {
@@ -84,6 +71,8 @@ const SettingsScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={commonStyles.screen} edges={['top', 'left', 'right']}>
+      <BackHeader title="Settings" />
+
       <ScrollView
         contentContainerStyle={commonStyles.scrollContainer}
         showsVerticalScrollIndicator={true}
@@ -93,6 +82,7 @@ const SettingsScreen = ({ navigation }) => {
           <ProfileCard
             name={currentUser.fullName}
             email={currentUser.email}
+            avatar={currentUser.avatar}
             onPress={() => navigation.navigate('EditProfile')}
           />
         )}
@@ -108,8 +98,11 @@ const SettingsScreen = ({ navigation }) => {
               icon="bell-outline"
               label="Notifications"
               type="switch"
-              switchValue={notification}
-              onToggle={setNotification}
+              switchValue={currentUser?.notificationEnabled ?? false}
+              onToggle={(value) => {
+                // Handle toggle notification setting
+                console.log('Notification toggled:', value);
+              }}
             />
 
             <SettingRow

@@ -145,7 +145,6 @@ const commonStyles = StyleSheet.create({
 
   // Bottom Navigation
   bottomTabBar: {
-    position: "absolute",
     height: 94,
     backgroundColor: COLORS.background,
 

@@ -121,7 +121,7 @@ export default function HomeScreen({ navigation }) {
     <SafeAreaView style={commonStyles.screen} edges={['top', 'left', 'right']}>
       <HomeHeader {...homeHeader} />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} style={commonStyles.container}>
 
         <SearchBar
           editable={false}
