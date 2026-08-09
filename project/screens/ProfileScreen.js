@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 
 import {
   View,
@@ -14,7 +14,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import commonStyles from '../styles/common';
 import profileStyles from '../styles/profile';
-import { getProfile } from '../api/authApi';
 import { fetchCurrentUser } from '../store/userSlice';
 import { resolveImage } from '../utils/imageUrl';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,48 +24,18 @@ import { COLORS } from '../styles/theme';
 const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
 
+  const { user: authUser } = useSelector(state => state.auth);
+  console.log('AUTH USER:', JSON.stringify(authUser));
+
   const { currentUser, status, error } = useSelector(state => state.user);
-
-  // ======================================
-  // LOAD USER
-  // ======================================
-
-  const loadUser = useCallback(async () => {
-    try {
-      // Auth profile dùng để lấy ID user hiện tại
-      const response = await getProfile();
-
-      const authUser = response.data;
-
+  console.log('CURRENT USER:', JSON.stringify(currentUser), 'STATUS:', status, 'ERROR:', error);
+  useFocusEffect(
+    useCallback(() => {
       if (authUser?.id) {
         dispatch(fetchCurrentUser(authUser.id));
       }
-    } catch (error) {
-      console.warn('Load profile failed:', error?.response?.status);
-    }
-  }, [dispatch]);
-
-  // ======================================
-  // FIRST LOAD
-  // ======================================
-
-  useEffect(() => {
-    loadUser();
-  }, [loadUser]);
-
-  // ======================================
-  // RELOAD WHEN SCREEN FOCUSED
-  // ======================================
-
-  useFocusEffect(
-    useCallback(() => {
-      loadUser();
-    }, [loadUser]),
+    }, [dispatch, authUser?.id]),
   );
-
-  // ======================================
-  // LOADING
-  // ======================================
 
   if (status === 'loading' && !currentUser) {
     return (
@@ -89,17 +58,13 @@ const ProfileScreen = ({ navigation }) => {
     );
   }
 
-  // ======================================
-  // RENDER
-  // ======================================
-
   return (
     <SafeAreaView style={commonStyles.screen} edges={['top', 'left', 'right']}>
       <BackHeader title="Profile" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={profileStyles.container}
+        contentContainerStyle={commonStyles.scrollContainer}
       >
         <View style={profileStyles.header}>
           <View style={profileStyles.avatarContainer}>
@@ -149,44 +114,46 @@ const ProfileScreen = ({ navigation }) => {
             <Text style={profileStyles.statLabel}>BADGES</Text>
           </View>
         </View>
-
         <Text style={profileStyles.sectionTitle}>ACCOUNT SETTINGS</Text>
 
-        <SettingRow
-          icon="receipt-text-outline"
-          title="My Orders"
-          onPress={() => {}}
-        />
+        <View style={profileStyles.settingsRow}>
+          <SettingRow
+            icon="order-bool-ascending-variant"
+            label="My Orders"
+            onPress={() => { }}
+          />
 
-        <SettingRow
-          icon="credit-card-outline"
-          title="Payment Methods"
-          onPress={() => {}}
-        />
+          <SettingRow
+            icon="credit-card-outline"
+            label="Payment Methods"
+            onPress={() => { }}
+          />
 
-        <SettingRow
-          icon="map-marker-outline"
-          title="Addresses"
-          onPress={() => {}}
-        />
+          <SettingRow
+            icon="map-marker-outline"
+            label="Addresses"
+            onPress={() => { }}
+          />
 
-        <SettingRow icon="heart-outline" title="Favorites" onPress={() => {}} />
+          <SettingRow icon="heart-outline" label="Favorites" onPress={() => { }} />
+        </View>
 
         <Text style={profileStyles.sectionTitle}>SUPPORT</Text>
 
-        <SettingRow
-          icon="cog-outline"
-          title="Settings"
-          onPress={() => navigation.navigate('Settings')}
-        />
+        <View style={profileStyles.settingsRow}>
+          <SettingRow
+            icon="cog-outline"
+            label="Settings"
+            onPress={() => navigation.navigate('Settings')}
+          />
 
-        <SettingRow
-          icon="help-circle-outline"
-          title="Help Center"
-          onPress={() => {}}
-        />
-
-        <TouchableOpacity style={profileStyles.logoutButton} onPress={() => {}}>
+          <SettingRow
+            icon="help-circle-outline"
+            label="Help Center"
+            onPress={() => { }}
+          />
+        </View>
+        <TouchableOpacity style={profileStyles.logoutButton} onPress={() => { }}>
           <MaterialCommunityIcons name="logout" size={20} color="#b30000" />
 
           <Text style={profileStyles.logoutText}>Logout</Text>

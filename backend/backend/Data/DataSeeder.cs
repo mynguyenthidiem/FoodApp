@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data
 {
-    // ==== Cấu trúc trung gian để khai báo dữ liệu seed cho gọn (không phải Model của EF) ====
     public class SeedRestaurant
     {
         public int Id { get; set; }
@@ -29,7 +28,6 @@ namespace backend.Data
         public decimal Price { get; set; }
     }
 
-    // ==== Seeder chính, chạy 1 lần lúc khởi động app (xem cách gọi ở Program.cs) ====
     public static class DataSeeder
     {
         public static async Task SeedAsync(AppDbContext context)
@@ -60,7 +58,8 @@ namespace backend.Data
             var roleAdmin = new Role { Name = "Admin", Description = "Quản trị hệ thống" };
             var roleOwner = new Role { Name = "Owner", Description = "Chủ nhà hàng" };
             var roleCustomer = new Role { Name = "Customer", Description = "Khách hàng" };
-            context.Roles.AddRange(roleAdmin, roleOwner, roleCustomer);
+            var roleDriver = new Role { Name = "Driver", Description = "Tài xế giao hàng" };
+            context.Roles.AddRange(roleAdmin, roleOwner, roleCustomer, roleDriver);
             await context.SaveChangesAsync();
 
             // ============ 2. USERS ============
@@ -101,7 +100,15 @@ namespace backend.Data
                 });
             }
 
-            context.Users.AddRange(new[] { admin, customer }.Concat(owners));
+            // 3 tài xế mẫu để test luồng nhận đơn / giao hàng
+            var drivers = new List<User>
+            {
+                new User { FullName = "Tran Van Tai", Email = "driver1@gmail.com", Password = demoPasswordHash, Phone = "0900000101", IsActive = true },
+                new User { FullName = "Le Van Xe",    Email = "driver2@gmail.com", Password = demoPasswordHash, Phone = "0900000102", IsActive = true },
+                new User { FullName = "Pham Van Giao", Email = "driver3@gmail.com", Password = demoPasswordHash, Phone = "0900000103", IsActive = true },
+            };
+
+            context.Users.AddRange(new[] { admin, customer }.Concat(owners).Concat(drivers));
             await context.SaveChangesAsync();
 
             // Gán role cho từng user
@@ -111,6 +118,18 @@ namespace backend.Data
             {
                 context.UserRoles.Add(new UserRole { UserId = owner.Id, RoleId = roleOwner.Id });
             }
+            foreach (var driver in drivers)
+            {
+                context.UserRoles.Add(new UserRole { UserId = driver.Id, RoleId = roleDriver.Id });
+            }
+            await context.SaveChangesAsync();
+
+            // Hồ sơ tài xế (DriverProfile) — chưa có GPS/vị trí, chỉ dữ liệu cơ bản
+            context.DriverProfiles.AddRange(
+                new DriverProfile { UserId = drivers[0].Id, VehicleType = VehicleType.Motorbike, LicensePlate = "59-X1 123.45", IsAvailable = true, Rating = 4.9, TotalDeliveries = 120 },
+                new DriverProfile { UserId = drivers[1].Id, VehicleType = VehicleType.Motorbike, LicensePlate = "59-X2 678.90", IsAvailable = true, Rating = 4.7, TotalDeliveries = 85 },
+                new DriverProfile { UserId = drivers[2].Id, VehicleType = VehicleType.Car, LicensePlate = "51G-123.45", IsAvailable = false, Rating = 4.8, TotalDeliveries = 200 }
+            );
             await context.SaveChangesAsync();
 
             // ============ 3. RESTAURANTS ============
@@ -184,16 +203,122 @@ namespace backend.Data
                     Name = f.Name,
                     Description = f.Description,
                     Price = f.Price,
-                    Image = null, // tương tự Restaurant, ảnh cần upload thật sau
+                    Image = null, 
                     Status = FoodStatus.Available,
                     CategoryId = category.Id,
                     RestaurantId = restaurantMap[f.RestaurantId].Id,
                 });
             }
             await context.SaveChangesAsync();
+
+            var now = DateTime.UtcNow;
+            var firstRestaurant = restaurantMap.Values.First();
+
+            var notifications = new List<Notification>
+            {
+                // Customer
+                new Notification
+                {
+                    UserId = customer.Id,
+                    Title = "Đơn hàng đã được đặt",
+                    Message = $"Đơn hàng của bạn tại {firstRestaurant.Name} đã được ghi nhận và đang chờ nhà hàng xác nhận.",
+                    Type = NotificationType.OrderCreated,
+                    RelatedEntityId = firstRestaurant.Id,
+                    IsRead = false,
+                    CreatedAt = now.AddMinutes(-30)
+                },
+                new Notification
+                {
+                    UserId = customer.Id,
+                    Title = "Đơn hàng đang được chuẩn bị",
+                    Message = $"{firstRestaurant.Name} đang chuẩn bị món ăn cho đơn hàng của bạn.",
+                    Type = NotificationType.OrderStatusChanged,
+                    RelatedEntityId = firstRestaurant.Id,
+                    IsRead = false,
+                    CreatedAt = now.AddMinutes(-20)
+                },
+                new Notification
+                {
+                    UserId = customer.Id,
+                    Title = "Thanh toán thành công",
+                    Message = "Chúng tôi đã nhận được thanh toán cho đơn hàng gần nhất của bạn.",
+                    Type = NotificationType.PaymentCompleted,
+                    RelatedEntityId = null,
+                    IsRead = true,
+                    CreatedAt = now.AddHours(-5)
+                },
+                new Notification
+                {
+                    UserId = customer.Id,
+                    Title = "Chào mừng bạn đến với ứng dụng!",
+                    Message = "Khám phá hàng trăm món ăn ngon từ các nhà hàng yêu thích gần bạn.",
+                    Type = NotificationType.System,
+                    RelatedEntityId = null,
+                    IsRead = true,
+                    CreatedAt = now.AddDays(-2)
+                },
+
+                // Owner (chủ nhà hàng đầu tiên)
+                new Notification
+                {
+                    UserId = owners[0].Id,
+                    Title = "Có đơn hàng mới",
+                    Message = $"{firstRestaurant.Name} vừa nhận được 1 đơn hàng mới, vui lòng xác nhận.",
+                    Type = NotificationType.OrderCreated,
+                    RelatedEntityId = firstRestaurant.Id,
+                    IsRead = false,
+                    CreatedAt = now.AddMinutes(-30)
+                },
+                new Notification
+                {
+                    UserId = owners[0].Id,
+                    Title = "Đánh giá mới từ khách hàng",
+                    Message = $"Một khách hàng vừa để lại đánh giá 5 sao cho món ăn tại {firstRestaurant.Name}.",
+                    Type = NotificationType.NewReview,
+                    RelatedEntityId = firstRestaurant.Id,
+                    IsRead = false,
+                    CreatedAt = now.AddHours(-3)
+                },
+
+                // Driver (tài xế đầu tiên)
+                new Notification
+                {
+                    UserId = drivers[0].Id,
+                    Title = "Có đơn hàng đang chờ giao",
+                    Message = $"Đơn hàng tại {firstRestaurant.Name} đã sẵn sàng, hãy nhận đơn để bắt đầu giao hàng.",
+                    Type = NotificationType.OrderStatusChanged,
+                    RelatedEntityId = firstRestaurant.Id,
+                    IsRead = false,
+                    CreatedAt = now.AddMinutes(-15)
+                },
+                new Notification
+                {
+                    UserId = drivers[0].Id,
+                    Title = "Chào mừng tài xế mới!",
+                    Message = "Bật trạng thái 'Sẵn sàng nhận đơn' để bắt đầu nhận đơn giao hàng.",
+                    Type = NotificationType.System,
+                    RelatedEntityId = null,
+                    IsRead = true,
+                    CreatedAt = now.AddDays(-1)
+                },
+
+                // Admin
+                new Notification
+                {
+                    UserId = admin.Id,
+                    Title = "Hệ thống hoạt động bình thường",
+                    Message = "Không có sự cố nào được ghi nhận trong 24 giờ qua.",
+                    Type = NotificationType.System,
+                    RelatedEntityId = null,
+                    IsRead = false,
+                    CreatedAt = now.AddHours(-1)
+                },
+            };
+
+            context.Notifications.AddRange(notifications);
+            await context.SaveChangesAsync();
         }
 
-        // Dữ liệu được trích xuất & chuẩn hoá từ project/project/data/restaurants.js (8 nhà hàng)
         private static List<SeedRestaurant> GetSeedRestaurants() => new()
         {
                         new SeedRestaurant { Id = 1, Name = "The Rustic Bun", Description = "Handcrafted burgers made with premium beef, artisan buns and homemade sauces.", Address = "123 Central Street, New York", Phone = "+1 123 456 789", Email = "hello@therusticbun.com", OpenTime = "09:00 AM", CloseTime = "10:00 PM", DeliveryFee = 1.99m, Rating = 4.8, TotalReviews = 268, IsActive = true },
@@ -206,7 +331,6 @@ namespace backend.Data
                         new SeedRestaurant { Id = 8, Name = "Green Garden", Description = "Healthy plant-based meals made with fresh organic ingredients, colorful salads and refreshing smoothies.", Address = "120 Green Avenue, Eco District", Phone = "+1 212 555 6633", Email = "hello@greengarden.com", OpenTime = "08:00 AM", CloseTime = "09:00 PM", DeliveryFee = 1.49m, Rating = 4.6, TotalReviews = 145, IsActive = true },
         };
 
-        // Dữ liệu được trích xuất & chuẩn hoá từ project/project/data/foods.js (65 món)
         private static List<SeedFood> GetSeedFoods() => new()
         {
                         new SeedFood { RestaurantId = 1, CategoryName = "Mains", Name = "Classic Burger", Description = "Premium beef, cheddar cheese, lettuce, tomato and signature sauce.", Price = 14.5m },

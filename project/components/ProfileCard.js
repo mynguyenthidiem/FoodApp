@@ -1,17 +1,26 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from '../styles/profile';
 import { COLORS } from '../styles/theme';
-const ProfileCard = ({ name, email, onPress }) => {
+import { resolveImage } from '../utils/imageUrl';
+
+const ProfileCard = ({ name, email, avatar, onPress }) => {
     return (
         <View style={styles.profileCardContainer}>
             <View style={styles.avatar}>
-                <MaterialCommunityIcons
-                    name="account"
-                    size={25}
-                    color={COLORS.black}
-                />
+                {avatar ? (
+                    <Image
+                        source={resolveImage(avatar)}
+                        style={styles.avatarImage}
+                    />
+                ) : (
+                    <MaterialCommunityIcons
+                        name="account"
+                        size={25}
+                        color={COLORS.black}
+                    />
+                )}
             </View>
             <View style={styles.profileInfo}>
                 <Text style={styles.name}>{name}</Text>

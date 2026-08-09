@@ -19,14 +19,16 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import CustomButton from '../components/CustomButton';
-import { login, googleLogin } from '../services/authService';
+import { useDispatch } from 'react-redux';
+import { loginUser, loginWithGoogle } from '../store/authSlice';
 import { getToken, setToken } from '../utils/tokenStorage';
-import { signInWithGoogle } from '../services/googleAuthService';
+import { signInWithGoogle } from '../styles/googleAuth';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -35,21 +37,19 @@ export default function LoginScreen({ navigation }) {
     }
     try {
       setLoading(true);
-      const res = await login({ email, password });
-      const { token } = res;
 
-      await setToken(token);
+      await dispatch(loginUser({ email, password })).unwrap();
 
       navigation.replace('MainTabs');
     } catch (err) {
       console.log('FULL ERROR:', err);
-      console.log('STATUS:', err.response?.status);
-      console.log('DATA:', err.response?.data);
 
       Alert.alert(
         'Login Failed',
-        JSON.stringify(err.response?.data || err.message),
+        typeof err === 'string' ? err : JSON.stringify(err),
       );
+    } finally {
+      setLoading(false);   // hiện tại cũng thiếu dòng này, nên nút Login bị kẹt "loading" khi lỗi
     }
   };
   const handleGoogleLogin = async () => {
@@ -62,16 +62,8 @@ export default function LoginScreen({ navigation }) {
       // Lấy Firebase ID Token
       const idToken = await userCredential.user.getIdToken();
 
-      // Gửi lên backend
-      const res = await googleLogin({
-        idToken,
-      });
-      const { token } = res;
+      await dispatch(loginWithGoogle({ idToken })).unwrap();
 
-      // Lưu JWT
-      await setToken(token);
-
-      // Vào app
       navigation.replace('MainTabs');
     } catch (err) {
       const message =

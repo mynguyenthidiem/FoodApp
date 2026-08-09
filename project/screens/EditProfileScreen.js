@@ -19,24 +19,24 @@ import BackHeader from '../components/BackHeader';
 import commonStyles from '../styles/common';
 import profileStyles from '../styles/profile';
 
-import { updateProfileAsync } from '../store/userSlice';
-
 import { resolveImage } from '../utils/imageUrl';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { launchImageLibrary } from 'react-native-image-picker';
-
+import { fetchCurrentUser, updateProfileAsync } from '../store/userSlice';
 import { COLORS } from '../styles/theme';
 
 const EditProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-
-  // ======================================
-  // REDUX USER
-  // ======================================
-
+  const { user: authUser } = useSelector(state => state.auth);
   const { currentUser, status, error } = useSelector(state => state.user);
+
+  useEffect(() => {
+    if (!currentUser && authUser?.id) {
+      dispatch(fetchCurrentUser(authUser.id));
+    }
+  }, [dispatch, currentUser, authUser?.id]);
 
   // ======================================
   // FORM STATE
@@ -152,8 +152,8 @@ const EditProfileScreen = ({ navigation }) => {
               source={
                 avatar
                   ? {
-                      uri: avatar.uri,
-                    }
+                    uri: avatar.uri,
+                  }
                   : resolveImage(currentUser?.avatar)
               }
               style={profileStyles.editAvatarImage}
@@ -262,7 +262,7 @@ const EditProfileScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={profileStyles.deleteAccountButton}
-          onPress={() => {}}
+          onPress={() => { }}
           activeOpacity={0.8}
         >
           <MaterialCommunityIcons
