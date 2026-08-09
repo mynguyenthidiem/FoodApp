@@ -1,60 +1,97 @@
-import React, { useEffect, useState } from "react";
-import { ScrollView, View, Text, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useMemo, useState } from 'react';
+import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import commonStyles from '../styles/common';
+import homeStyles from '../styles/home';
 
-import commonStyles from "../styles/common";
-import homeStyles from "../styles/home";
-
-import BackHeader from "../components/BackHeader";
-import FilterChip from "../components/FilterChip";
-import RestaurantListCard from "../components/RestaurantListCard";
-
-import { getAllRestaurants } from "../api/restaurantApi";
+import BackHeader from '../components/BackHeader';
+import FilterChip from '../components/FilterChip';
+import RestaurantListCard from '../components/RestaurantListCard';
+import { fetchRestaurants } from '../store/restaurantSlice';
 
 export default function RestaurantListScreen({ navigation, route }) {
   const { categoryName, filter } = route.params ?? {};
-  const filters = ["All", "Top Rated"];
-
-  const [selectedFilter, setSelectedFilter] = useState(filter || "All");
-  const [restaurants, setRestaurants] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const loadRestaurants = async () => {
-    try {
-      setLoading(true);
-      const response = await getAllRestaurants();
-      setRestaurants(response.data.items || []);
-    } catch (error) {
-      console.log("Load restaurants failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const dispatch = useDispatch();
+  const restaurants = useSelector(state => state.restaurant.items);
+  const status = useSelector(state => state.restaurant.status);
+  const error = useSelector(state => state.restaurant.error);
+  const filters = ['All', 'Top Rated'];
+  const [selectedFilter, setSelectedFilter] = useState(filter || 'All');
 
   useEffect(() => {
-    loadRestaurants();
-  }, []);
-
-  let filteredRestaurants = [...restaurants];
-
-  if (categoryName) {
-    filteredRestaurants = filteredRestaurants.filter(restaurant =>
-      restaurant.categories?.some(category =>
-        category.toLowerCase() === categoryName.toLowerCase()
-      )
+    dispatch(fetchRestaurants({ pageNumber: 1, pageSize: 100 }));
+  }, [dispatch]);
+  const filteredRestaurants = useMemo(() => {
+    let result = [...restaurants];
+    if (categoryName) {
+      result = result.filter(restaurant =>
+        restaurant.categories?.some(
+          category =>
+            String(category).toLowerCase() ===
+            String(categoryName).toLowerCase(),
+        ),
+      );
+    }
+    if (selectedFilter === 'Top Rated') {
+      result = result.filter(
+        restaurant => Number(restaurant.rating ?? 0) >= 4.9,
+      );
+    }
+    return result;
+  }, [restaurants, categoryName, selectedFilter]);
+  if (status === 'loading') {
+    return (
+      <SafeAreaView style={commonStyles.screen} edges={['top', 'bottom']}>
+        {' '}
+        <BackHeader
+          title={categoryName || 'Restaurants'}
+          subtitle="Loading restaurants..."
+        />{' '}
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          {' '}
+          <ActivityIndicator size="large" />{' '}
+        </View>{' '}
+      </SafeAreaView>
     );
   }
-
-  if (selectedFilter === "Top Rated") {
-    filteredRestaurants = filteredRestaurants.filter(
-      restaurant => restaurant.rating >= 4.9
+  if (status === 'failed') {
+    return (
+      <SafeAreaView style={commonStyles.screen} edges={['top', 'bottom']}>
+        {' '}
+        <BackHeader
+          title={categoryName || 'Restaurants'}
+          subtitle="Unable to load restaurants"
+        />{' '}
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 20,
+          }}
+        >
+          {' '}
+          <Text> Failed to load restaurants. </Text>{' '}
+          {error && (
+            <Text style={{ marginTop: 8, textAlign: 'center' }}> {error} </Text>
+          )}{' '}
+        </View>{' '}
+      </SafeAreaView>
     );
   }
-
   return (
-    <SafeAreaView style={commonStyles.screen} edges={["top", "bottom"]}>
-      <BackHeader title={categoryName || "Restaurants"} subtitle={`${filteredRestaurants.length} restaurants`} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={commonStyles.scrollContainer}>
+    <SafeAreaView style={commonStyles.screen} edges={['top', 'bottom']}>
+      <BackHeader
+        title={categoryName || 'Restaurants'}
+        subtitle={`${filteredRestaurants.length} restaurants`}
+      />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={commonStyles.scrollContainer}
+      >
         <View style={homeStyles.filterContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {filters.map(filter => (
@@ -68,22 +105,23 @@ export default function RestaurantListScreen({ navigation, route }) {
           </ScrollView>
         </View>
 
-        {loading ?
-          <ActivityIndicator size="large" />
-          :
-          filteredRestaurants.length === 0 ?
-            <View style={{ paddingVertical: 40, alignItems: "center" }}>
-              <Text>No restaurants found.</Text>
-            </View>
-            :
-            filteredRestaurants.map(restaurant => (
-              <RestaurantListCard
-                key={restaurant.id}
-                item={restaurant}
-                onPress={() => navigation.navigate("RestaurantDetail", { restaurantId: restaurant.id })}
-              />
-            ))
-        }
+        {filteredRestaurants.length === 0 ? (
+          <View style={{ paddingVertical: 40, alignItems: 'center' }}>
+            <Text>No restaurants found.</Text>
+          </View>
+        ) : (
+          filteredRestaurants.map(restaurant => (
+            <RestaurantListCard
+              key={restaurant.id}
+              item={restaurant}
+              onPress={() =>
+                navigation.navigate('RestaurantDetail', {
+                  restaurantId: restaurant.id,
+                })
+              }
+            />
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );

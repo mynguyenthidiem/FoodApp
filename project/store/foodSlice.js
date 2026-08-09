@@ -1,117 +1,86 @@
-import {
-  createSlice,
-  createAsyncThunk,
-} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 import {
   getFoods,
   getFoodById,
   getFoodsByCategory,
   searchFoods,
-} from "../services/foodService";
+} from '../services/foodService';
 
-// ==============================
+// ======================================
 // GET ALL FOODS
-// ==============================
+// ======================================
 
 export const fetchFoods = createAsyncThunk(
-  "food/fetchFoods",
-  async ({
-    pageNumber = 1,
-    pageSize = 20,
-  } = {}) => {
-    return await getFoods(
-      pageNumber,
-      pageSize
-    );
-  }
+  'food/fetchFoods',
+  async ({ pageNumber = 1, pageSize = 100 } = {}) => {
+    return await getFoods(pageNumber, pageSize);
+  },
 );
 
-// ==============================
+// ======================================
 // GET FOOD DETAIL
-// ==============================
+// ======================================
 
-export const fetchFoodById =
-  createAsyncThunk(
-    "food/fetchFoodById",
-    async (id) => {
-      return await getFoodById(id);
-    }
-  );
-
-export const fetchSearchFoods =
-createAsyncThunk(
-  "food/fetchSearchFoods",
-  async ({
-    keyword="",
-    pageNumber = 1,
-    pageSize = 20,
-  } ={}) => {
-
-    return await searchFoods(
-      keyword,
-      pageNumber,
-      pageSize
-    );
-
-  }
+export const fetchFoodById = createAsyncThunk(
+  'food/fetchFoodById',
+  async id => {
+    return await getFoodById(id);
+  },
 );
 
-// ==============================
-// GET RELATED FOODS
-// ==============================
+// ======================================
+// SEARCH
+// ======================================
 
-export const fetchFoodsByCategory =
-  createAsyncThunk(
-    "food/fetchFoodsByCategory",
-    async ({
-      categoryId,
-      pageNumber = 1,
-      pageSize = 20,
-    }) => {
-      return await getFoodsByCategory(
-        categoryId,
-        pageNumber,
-        pageSize
-      );
-    }
-  );
+export const fetchSearchFoods = createAsyncThunk(
+  'food/fetchSearchFoods',
+  async ({ keyword = '', pageNumber = 1, pageSize = 20 } = {}) => {
+    return await searchFoods(keyword, pageNumber, pageSize);
+  },
+);
+
+// ======================================
+// RELATED FOODS
+// ======================================
+
+export const fetchFoodsByCategory = createAsyncThunk(
+  'food/fetchFoodsByCategory',
+  async ({ categoryId, pageNumber = 1, pageSize = 20 }) => {
+    return await getFoodsByCategory(categoryId, pageNumber, pageSize);
+  },
+);
+
+// ======================================
+// INITIAL STATE
+// ======================================
 
 const initialState = {
-
-  // Home
-
   items: [],
 
   pageNumber: 1,
-
   totalPages: 1,
-
   totalCount: 0,
 
   searchResults: [],
 
-  // Detail
-
   food: null,
-
   relatedFoods: [],
 
-  // State
-
-  status: "idle",
-
+  status: 'idle',
   error: null,
 };
 
-const foodSlice = createSlice({
+// ======================================
+// SLICE
+// ======================================
 
-  name: "food",
+const foodSlice = createSlice({
+  name: 'food',
 
   initialState,
 
   reducers: {
-
     clearFoodDetail(state) {
       state.food = null;
       state.relatedFoods = [];
@@ -120,171 +89,106 @@ const foodSlice = createSlice({
     clearSearchResults(state) {
       state.searchResults = [];
     },
-
   },
 
-  extraReducers: (builder) => {
-
+  extraReducers: builder => {
     builder
 
-      // ==========================
+      // ==================================
       // GET ALL
-      // ==========================
+      // ==================================
 
-      .addCase(
-        fetchFoods.pending,
-        (state) => {
+      .addCase(fetchFoods.pending, state => {
+        state.status = 'loading';
+        state.error = null;
+      })
 
-          state.status = "loading";
+      .addCase(fetchFoods.fulfilled, (state, action) => {
+        state.status = 'succeeded';
 
-          state.searchResults = [];
+        state.items = action.payload?.items ?? [];
 
+        state.pageNumber = action.payload?.pageNumber ?? 1;
+
+        state.totalPages = action.payload?.totalPages ?? 1;
+
+        state.totalCount = action.payload?.totalCount ?? state.items.length;
+
+        state.error = null;
+      })
+
+      .addCase(fetchFoods.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+
+      // ==================================
+      // DETAIL
+      // ==================================
+
+      .addCase(fetchFoodById.pending, state => {
+        state.status = 'loading';
+        state.food = null;
+        state.error = null;
+      })
+
+      .addCase(fetchFoodById.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.food = action.payload;
+        state.error = null;
+      })
+
+      .addCase(fetchFoodById.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+
+      // ==================================
+      // RELATED
+      // ==================================
+
+      .addCase(fetchFoodsByCategory.pending, state => {
+        state.relatedFoods = [];
+      })
+
+      .addCase(fetchFoodsByCategory.fulfilled, (state, action) => {
+        const items = action.payload?.items ?? [];
+
+        if (state.food) {
+          state.relatedFoods = items.filter(item => item.id !== state.food.id);
+        } else {
+          state.relatedFoods = items;
         }
-      )
+      })
 
-      .addCase(
-        fetchFoods.fulfilled,
-        (state, action) => {
+      .addCase(fetchFoodsByCategory.rejected, (state, action) => {
+        state.error = action.error.message;
+      })
 
-          state.status = "succeeded";
+      // ==================================
+      // SEARCH
+      // ==================================
 
-          state.items = action.payload.items;
+      .addCase(fetchSearchFoods.pending, state => {
+        state.status = 'loading';
+        state.error = null;
+      })
 
-          state.pageNumber = action.payload.pageNumber;
+      .addCase(fetchSearchFoods.fulfilled, (state, action) => {
+        state.status = 'succeeded';
 
-          state.totalPages = action.payload.totalPages;
+        state.searchResults = action.payload?.items ?? [];
 
-          state.totalCount = action.payload.totalCount;
-        }
-      )
+        state.error = null;
+      })
 
-      .addCase(
-        fetchFoods.rejected,
-        (state, action) => {
-
-          state.status = "failed";
-
-          state.error = action.error.message;
-        }
-      )
-
-      // ==========================
-      // GET DETAIL
-      // ==========================
-
-      .addCase(
-        fetchFoodById.pending,
-        (state) => {
-
-          state.status = "loading";
-
-          state.food = null;
-        }
-      )
-
-      .addCase(
-        fetchFoodById.fulfilled,
-        (state, action) => {
-
-          state.status = "succeeded";
-
-          state.food = action.payload;
-        }
-      )
-
-      .addCase(
-        fetchFoodById.rejected,
-        (state, action) => {
-
-          state.status = "failed";
-
-          state.error =
-            action.error.message;
-        }
-      )
-
-      // ==========================
-      // RELATED FOODS
-      // ==========================
-
-      .addCase(
-        fetchFoodsByCategory.pending,
-        (state) => {
-
-          state.relatedFoods = [];
-        }
-      )
-
-      .addCase(
-        fetchFoodsByCategory.fulfilled,
-        (state, action) => {
-
-          if (state.food) {
-
-            state.relatedFoods =
-              action.payload.items.filter(
-                (item) =>
-                  item.id !== state.food.id
-              );
-
-          } else {
-
-            state.relatedFoods =
-              action.payload.items;
-          }
-        }
-      )
-
-      .addCase(
-        fetchFoodsByCategory.rejected,
-        (state, action) => {
-
-          state.error =
-            action.error.message;
-        }
-      )
-
-      // SEARCH FOODS
-
-      .addCase(
-      fetchSearchFoods.pending,
-      (state) => {
-
-        state.status = "loading";
-
-      }
-    )
-
-      .addCase(
-        fetchSearchFoods.fulfilled,
-        (state, action) => {
-
-          state.status = "succeeded";
-
-          state.searchResults =
-            action.payload.items;
-
-        }
-      )
-
-    .addCase(
-      fetchSearchFoods.rejected,
-      (state, action) => {
-
-        state.status = "failed";
-
-        state.error =
-          action.error.message;
-
-      }
-    )
-    },
-
+      .addCase(fetchSearchFoods.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      });
+  },
 });
 
-export const {
-  clearFoodDetail,
-  clearSearchResults,
-} = foodSlice.actions;
+export const { clearFoodDetail, clearSearchResults } = foodSlice.actions;
 
 export default foodSlice.reducer;

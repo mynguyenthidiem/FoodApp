@@ -1,52 +1,55 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 import {
   getAllRestaurants,
   getRestaurantById,
-} from "../services/restaurantService";
+} from '../services/restaurantService';
 
-// GET ALL RESTAURANTS
+// ======================================
+// GET ALL
+// ======================================
 
 export const fetchRestaurants = createAsyncThunk(
-  "restaurant/fetchRestaurants",
+  'restaurant/fetchRestaurants',
   async ({ pageNumber = 1, pageSize = 20 } = {}) => {
     return await getAllRestaurants(pageNumber, pageSize);
   },
 );
 
-// GET RESTAURANT DETAIL
+// ======================================
+// GET DETAIL
+// ======================================
 
 export const fetchRestaurantById = createAsyncThunk(
-  "restaurant/fetchRestaurantById",
-  async (id) => {
+  'restaurant/fetchRestaurantById',
+  async id => {
     return await getRestaurantById(id);
   },
 );
 
-const initialState = {
-  // restaurant list
+// ======================================
+// INITIAL STATE
+// ======================================
 
+const initialState = {
   items: [],
 
   pageNumber: 1,
-
   totalPages: 1,
-
   totalCount: 0,
-
-  // current restaurant
 
   restaurant: null,
 
-  // loading
-
-  status: "idle",
-
+  status: 'idle',
   error: null,
 };
 
+// ======================================
+// SLICE
+// ======================================
+
 const restaurantSlice = createSlice({
-  name: "restaurant",
+  name: 'restaurant',
 
   initialState,
 
@@ -56,47 +59,58 @@ const restaurantSlice = createSlice({
     },
   },
 
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
 
+      // ==================================
       // GET ALL
+      // ==================================
 
-      .addCase(fetchRestaurants.pending, (state) => {
-        state.status = "loading";
+      .addCase(fetchRestaurants.pending, state => {
+        state.status = 'loading';
+        state.error = null;
       })
 
       .addCase(fetchRestaurants.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = 'succeeded';
 
-        state.items = action.payload.items;
+        state.items = action.payload?.items ?? [];
 
-        state.pageNumber = action.payload.pageNumber;
+        state.pageNumber = action.payload?.pageNumber ?? 1;
 
-        state.totalPages = action.payload.totalPages;
+        state.totalPages = action.payload?.totalPages ?? 1;
 
-        state.totalCount = action.payload.totalCount;
+        state.totalCount = action.payload?.totalCount ?? state.items.length;
+
+        state.error = null;
       })
 
       .addCase(fetchRestaurants.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = 'failed';
 
         state.error = action.error.message;
       })
 
-      // GET DETAIL
+      // ==================================
+      // DETAIL
+      // ==================================
 
-      .addCase(fetchRestaurantById.pending, (state) => {
-        state.status = "loading";
+      .addCase(fetchRestaurantById.pending, state => {
+        state.status = 'loading';
+
+        state.error = null;
       })
 
       .addCase(fetchRestaurantById.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = 'succeeded';
 
         state.restaurant = action.payload;
+
+        state.error = null;
       })
 
       .addCase(fetchRestaurantById.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = 'failed';
 
         state.error = action.error.message;
       });

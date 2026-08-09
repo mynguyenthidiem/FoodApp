@@ -1,14 +1,7 @@
 import { StyleSheet } from "react-native";
-import {
-  COLORS,
-  FONT,
-  SPACING,
-  RADIUS,
-  SHADOW,
-} from "./theme";
+import { COLORS, FONT, SPACING, RADIUS, SHADOW } from "./theme";
 
 const restaurantStyles = StyleSheet.create({
-
   // BADGE
 
   badgeContainer: {
@@ -147,7 +140,7 @@ const restaurantStyles = StyleSheet.create({
   heroImage: {
     width: "100%",
     height: 320,
-     borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.lg,
   },
 
   heroContent: {
@@ -199,7 +192,7 @@ const restaurantStyles = StyleSheet.create({
   // MENU ITEM CARD
 
   menuItemCard: {
-    flexDirection:"row",
+    flexDirection: "row",
     backgroundColor: COLORS.background,
     borderRadius: RADIUS.lg,
     overflow: "hidden",
@@ -207,15 +200,15 @@ const restaurantStyles = StyleSheet.create({
     ...SHADOW,
   },
 
-   menuItemImage: {
+  menuItemImage: {
     width: 90,
-    height: "100%",    
+    height: "100%",
     // borderRadius: RADIUS.md,
-    alignItems:'center',
+    alignItems: "center",
   },
 
-   menuItemContent: {
-    flex: 1,    
+  menuItemContent: {
+    flex: 1,
     padding: SPACING.lg,
     justifyContent: "space-between",
   },
@@ -406,7 +399,7 @@ const restaurantStyles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.heading,
   },
-  
+
   // REVIEW CARD
 
   reviewCard: {
@@ -557,6 +550,41 @@ const restaurantStyles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: COLORS.surface,
     ...SHADOW,
+  },
+  // CART MODE
+
+  cartControls: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: SPACING.md,
+  },
+
+  quantityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  qtyButton: {
+    width: 36,
+    height: 36,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    borderRadius: RADIUS.circle,
+
+    backgroundColor: COLORS.secondary,
+  },
+
+  qtyText: {
+    width: 42,
+    textAlign: "center",
+
+    fontSize: FONT.body,
+    fontWeight: "700",
+
+    color: COLORS.heading,
   },
 });
 

@@ -166,13 +166,7 @@ const commonStyles = StyleSheet.create({
     ...SHADOW,
   },
 
-  // scroller
-  scrollContainer: {
-    flexGrow: 1,
-    backgroundColor: COLORS.background,
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: 120,
-  },
+ 
 });
 
 export default commonStyles;

@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { View, ScrollView, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useEffect } from 'react';
+import { View, ScrollView, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import BackHeader from "../components/BackHeader";
-import SearchBar from "../components/SearchBar";
-import FilterChip from "../components/FilterChip";
-import FeaturedCategoryCard from "../components/FeaturedCategoryCard";
-import CollectionCard from "../components/CollectionCard";
+import BackHeader from '../components/BackHeader';
+import SearchBar from '../components/SearchBar';
+import FilterChip from '../components/FilterChip';
+import FeaturedCategoryCard from '../components/FeaturedCategoryCard';
+import CollectionCard from '../components/CollectionCard';
 
-import commonStyles from "../styles/common";
-import homeStyles from "../styles/home";
+import commonStyles from '../styles/common';
+import homeStyles from '../styles/home';
 
-import { getSystemCategories } from "../api/categoryApi";
-import { getAllRestaurants } from "../api/restaurantApi";
+import { getSystemCategories } from '../services/categoryService';
+import { getAllRestaurants } from '../services/restaurantService';
 
 export default function CategoryScreen({ navigation }) {
-
-  const filters = ["All Categories", "Top Rated"];
+  const filters = ['All Categories', 'Top Rated'];
 
   const [selectedFilter, setSelectedFilter] = useState(filters[0]);
   const [categories, setCategories] = useState([]);
@@ -29,19 +28,17 @@ export default function CategoryScreen({ navigation }) {
       setLoading(true);
 
       const categoryResponse = await getSystemCategories();
-      const restaurantResponse = await getAllRestaurants();
+      const restaurantResponse = await getAllRestaurants(1,100);
 
-      const categoryData = categoryResponse.data || [];
-      const restaurantData = restaurantResponse.data.items || [];
+      const categoryData = categoryResponse ?? [];
+      const restaurantData = restaurantResponse?.items ?? [];
 
       setCategories(categoryData);
       setAllCategories(categoryData);
       setRestaurants(restaurantData);
-
     } catch (error) {
-      console.log(error);
-    }
-    finally {
+      console.log('Loading category data failed:', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -50,44 +47,36 @@ export default function CategoryScreen({ navigation }) {
     loadData();
   }, []);
 
-
-  const handleFilter = (filter) => {
+  const handleFilter = filter => {
     setSelectedFilter(filter);
 
-    if (filter === "All Categories") {
+    if (filter === 'All Categories') {
       setCategories(allCategories);
       return;
     }
 
-    if (filter === "Top Rated") {
-
+    if (filter === 'Top Rated') {
       const topRatedRestaurants = restaurants.filter(
-        restaurant => restaurant.rating >= 4.9
+        restaurant => Number(restaurant.rating) >= 4.9,
       );
 
       const topCategories = [];
 
       topRatedRestaurants.forEach(restaurant => {
         restaurant.categories?.forEach(category => {
-
           if (!topCategories.includes(category)) {
             topCategories.push(category);
           }
-
         });
       });
 
-
       const result = allCategories.filter(category =>
-        topCategories.includes(category.name)
+        topCategories.includes(category.name),
       );
 
       setCategories(result);
-
     }
-
   };
-
 
   const sections = [];
 
@@ -98,82 +87,74 @@ export default function CategoryScreen({ navigation }) {
     });
   }
 
-
   return (
-    <SafeAreaView style={commonStyles.screen} edges={["top", "bottom"]}>
-
+    <SafeAreaView style={commonStyles.screen} edges={['top', 'bottom']}>
       <BackHeader title="Categories" />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={commonStyles.scrollContainer}>
-
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={commonStyles.scrollContainer}
+      >
         <SearchBar />
 
         <View style={homeStyles.filterContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-
             {filters.map(filter => (
-
               <FilterChip
                 key={filter}
                 title={filter}
                 selected={selectedFilter === filter}
                 onPress={() => handleFilter(filter)}
               />
-
             ))}
-
           </ScrollView>
         </View>
 
-
-        {loading ?
+        {loading ? (
           <ActivityIndicator size="large" />
-          :
+        ) : (
           sections.map(section => (
-
             <View key={section.featured.id}>
-
               <FeaturedCategoryCard
                 item={{
                   id: section.featured.id,
                   title: section.featured.name,
-                  subtitle: section.featured.description || "Food Category",
+                  subtitle: section.featured.description || 'Food Category',
                   image: section.featured.image,
                 }}
-                onPress={() => { }}
+                onPress={() =>
+                  navigation.navigate('RestaurantList', {
+                    categoryId: section.featured.id,
+                    categoryName: section.featured.name,
+                  })
+                }
               />
-
 
               {section.smalls.length > 0 && (
                 <View style={homeStyles.collectionRow}>
-
                   {section.smalls.map(category => (
-
                     <CollectionCard
                       key={category.id}
                       item={{
                         id: category.id,
                         name: category.name,
-                        subtitle: category.description || "Food Category",
+                        subtitle: category.description || 'Food Category',
                         image: category.image,
                       }}
-                      onPress={() => { }}
+                      onPress={() =>
+                        navigation.navigate('RestaurantList', {
+                          categoryId: category.id,
+                          categoryName: category.name,
+                        })
+                      }
                     />
-
                   ))}
-
                 </View>
               )}
-
             </View>
-
           ))
-
-        }
-
+        )}
       </ScrollView>
-
     </SafeAreaView>
   );
-
 }
