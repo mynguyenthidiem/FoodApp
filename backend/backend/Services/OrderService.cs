@@ -214,6 +214,10 @@ namespace backend.Services
             {
                 throw new ArgumentException("Invalid order status.");
             }
+            if (!isAdmin && (dto.Status == OrderStatus.Delivering || dto.Status == OrderStatus.Completed))
+            {
+                throw new UnauthorizedAccessException("Only the assigned driver can update the delivery status of this order.");
+            }
 
             if (!CanChangeStatus(order.Status, dto.Status))
             {
@@ -260,6 +264,16 @@ namespace backend.Services
                 DeliveryFee = order.DeliveryFee,
                 PaymentMethod = order.PaymentMethod,
                 ShippingAddress = order.ShippingAddress,
+
+                RestaurantName = order.Restaurant?.Name ?? "",
+                RestaurantAddress = order.Restaurant?.Address ?? "",
+
+                DriverId = order.DriverId,
+                DriverName = order.Driver?.FullName,
+                DriverPhone = order.Driver?.Phone,
+                AssignedAt = order.AssignedAt,
+                PickedUpAt = order.PickedUpAt,
+                DeliveredAt = order.DeliveredAt,
 
                 Payment = order.Payment == null ? null : new PaymentResponseDto
                 {

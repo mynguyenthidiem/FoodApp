@@ -29,5 +29,7 @@ namespace backend.Repositories.Interfaces
         Task<(List<Order> Items, int TotalCount)> GetRestaurantOrdersAsync(int ownerId, int pageNumber, int pageSize);
 
         Task<(List<Order> Items, int TotalCount)> GetAllOrdersAsync(int pageNumber, int pageSize);
+        Task<(List<Order> Items, int TotalCount)> GetAvailableOrdersForDriverAsync(int pageNumber, int pageSize);
+        Task<(List<Order> Items, int TotalCount)> GetDriverOrdersAsync(int driverId, int pageNumber, int pageSize);
     }
 }

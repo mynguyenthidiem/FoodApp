@@ -19,6 +19,7 @@ namespace backend.Repositories
         {
             var query = _context.Orders
                 .Include(o => o.Restaurant)
+                .Include(o => o.Driver)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(d => d.Food)
                 .Where(o => o.UserId == userId)
@@ -60,7 +61,8 @@ namespace backend.Repositories
         {
             return await _context.Orders
                 .Include(o => o.Restaurant)
-                .Include(o=>o.Payment)
+                .Include(o => o.Driver)
+                .Include(o => o.Payment)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(d => d.Food)
                 .FirstOrDefaultAsync(o => o.Id == id);
@@ -125,6 +127,7 @@ namespace backend.Repositories
         {
             return await _context.Orders
                .Include(o => o.Restaurant)
+               .Include(o => o.Driver)
                .Include(o => o.Payment)
                .Include(o => o.OrderDetails)
                     .ThenInclude(d => d.Food)
@@ -138,6 +141,7 @@ namespace backend.Repositories
                                .ThenInclude(od => od.Food)
                            .Include(o => o.Payment)
                            .Include(o => o.Restaurant)
+                           .Include(o => o.Driver)
                            .Where(o => o.Restaurant!.OwnerId == ownerId)
                            .OrderByDescending(o => o.OrderDate)
                            .AsNoTracking();
@@ -153,10 +157,42 @@ namespace backend.Repositories
             var query = _context.Orders
                            .Include(o => o.Payment)
                            .Include(o => o.Restaurant)
+                           .Include(o => o.Driver)
                            .Include(o => o.OrderDetails)
                                .ThenInclude(d => d.Food)
                            .OrderByDescending(o => o.OrderDate)
                         .AsNoTracking();
+            var totalCount = await query.CountAsync();
+            var items = await query.Skip((pageNumber - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .ToListAsync();
+            return (items, totalCount);
+        }
+        public async Task<(List<Order> Items, int TotalCount)> GetAvailableOrdersForDriverAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Orders
+                           .Include(o => o.Restaurant)
+                           .Include(o => o.OrderDetails)
+                               .ThenInclude(d => d.Food)
+                           .Where(o => o.Status == OrderStatus.Preparing && o.DriverId == null)
+                           .OrderBy(o => o.OrderDate)
+                           .AsNoTracking();
+            var totalCount = await query.CountAsync();
+            var items = await query.Skip((pageNumber - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .ToListAsync();
+            return (items, totalCount);
+        }
+        public async Task<(List<Order> Items, int TotalCount)> GetDriverOrdersAsync(int driverId, int pageNumber, int pageSize)
+        {
+            var query = _context.Orders
+                           .Include(o => o.Restaurant)
+                           .Include(o => o.Payment)
+                           .Include(o => o.OrderDetails)
+                               .ThenInclude(d => d.Food)
+                           .Where(o => o.DriverId == driverId)
+                           .OrderByDescending(o => o.OrderDate)
+                           .AsNoTracking();
             var totalCount = await query.CountAsync();
             var items = await query.Skip((pageNumber - 1) * pageSize)
                                     .Take(pageSize)

@@ -20,7 +20,9 @@ namespace backend.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Restaurant> Restaurants { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-
+        public DbSet<FavoriteFood> FavoriteFoods { get; set; }
+        public DbSet<FavoriteRestaurant> FavoriteRestaurants { get; set; }
+        public DbSet<DriverProfile> DriverProfiles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -195,6 +197,53 @@ namespace backend.Data
 
             modelBuilder.Entity<Notification>()
              .HasIndex(n => new { n.UserId, n.CreatedAt });
+
+            modelBuilder.Entity<FavoriteFood>()
+               .HasIndex(ff => new { ff.UserId, ff.FoodId })
+               .IsUnique();
+
+            modelBuilder.Entity<FavoriteFood>()
+                .HasOne(ff => ff.User)
+                .WithMany()
+                .HasForeignKey(ff => ff.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FavoriteFood>()
+                .HasOne(ff => ff.Food)
+                .WithMany()
+                .HasForeignKey(ff => ff.FoodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FavoriteRestaurant>()
+                .HasIndex(fr => new { fr.UserId, fr.RestaurantId })
+                .IsUnique();
+
+            modelBuilder.Entity<FavoriteRestaurant>()
+                .HasOne(fr => fr.User)
+                .WithMany()
+                .HasForeignKey(fr => fr.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FavoriteRestaurant>()
+                .HasOne(fr => fr.Restaurant)
+                .WithMany()
+                .HasForeignKey(fr => fr.RestaurantId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DriverProfile>()
+               .HasOne(dp => dp.User)
+               .WithOne(u => u.DriverProfile)
+               .HasForeignKey<DriverProfile>(dp => dp.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DriverProfile>()
+                .Property(dp => dp.VehicleType)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Driver)
+                .WithMany()
+                .HasForeignKey(o => o.DriverId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

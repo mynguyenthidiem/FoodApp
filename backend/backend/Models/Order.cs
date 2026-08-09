@@ -32,6 +32,16 @@ namespace backend.Models
         public virtual Restaurant Restaurant { get; set; } = null!;
 
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public int? DriverId { get; set; }
+
+        [ForeignKey(nameof(DriverId))]
+        public virtual User? Driver { get; set; }
+        public DateTime? AssignedAt { get; set; }
+
+        public DateTime? PickedUpAt { get; set; }
+
+        public DateTime? DeliveredAt { get; set; }
+
     }
 
     public enum OrderStatus
