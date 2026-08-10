@@ -1,7 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import restaurantStyles from "../styles/restaurant";
 import { COLORS } from "../styles/theme";
 
@@ -12,7 +12,7 @@ export default function RestaurantActionBar({
   onFavoritePress,
 }) {
   return (
-    <View style={restaurantStyles.actionBar}>
+    <SafeAreaView style={restaurantStyles.actionBar}>
       <TouchableOpacity
         style={restaurantStyles.actionButton}
         onPress={onBackPress}
@@ -51,6 +51,6 @@ export default function RestaurantActionBar({
           />
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

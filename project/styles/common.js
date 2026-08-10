@@ -65,7 +65,13 @@ const commonStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  headerRightTextButton: {
+    minWidth: 40,
+    height: 40,
 
+    justifyContent: "center",
+    alignItems: "flex-end",
+  },
   backButton: {
     width: 40,
     height: 40,
@@ -165,7 +171,7 @@ const commonStyles = StyleSheet.create({
     ...SHADOW,
   },
 
- 
+
 });
 
 export default commonStyles;

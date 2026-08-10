@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 
 import HomeHeader from '../components/HomeHeader';
 import BannerCard from '../components/BannerCard';
@@ -15,12 +16,13 @@ import commonStyles from '../styles/common';
 import homeStyles from '../styles/home';
 import { COLORS } from '../styles/theme';
 
-import { homeHeader, banner } from '../data/homeData';
+import { banner } from '../data/homeData';
 import { resolveImage } from '../utils/imageUrl';
 
 import { getFoods } from '../services/foodService';
 import { getSystemCategories } from '../services/categoryService';
 import { getAllRestaurants } from '../services/restaurantService';
+import { fetchCurrentUser } from '../store/userSlice';
 
 import { toggleFavorite } from '../store/favoriteSlice';
 
@@ -117,10 +119,26 @@ export default function HomeScreen({ navigation }) {
     loadFoods();
   }, []);
 
+  const authUser = useSelector(state => state.auth.user);
+  const { currentUser, status, error } = useSelector(state => state.user);
+  console.log('CURRENT USER:', JSON.stringify(currentUser), 'STATUS:', status, 'ERROR:', error);
+  useFocusEffect(
+    useCallback(() => {
+      if (authUser?.id) {
+        dispatch(fetchCurrentUser(authUser.id));
+      }
+    }, [dispatch, authUser?.id]),
+  );
+
   return (
     <SafeAreaView style={commonStyles.screen} edges={['top', 'left', 'right']}>
-      <HomeHeader {...homeHeader} />
-
+      <HomeHeader
+        appName="EatLocal"
+        location="Binh Duong"
+        avatar={resolveImage(currentUser?.avatar)}
+        onNotificationPress={() => navigation.navigate("Notifications")}
+        onProfilePress={() => navigation.navigate("Profile")}
+      />
       <ScrollView showsVerticalScrollIndicator={false} style={commonStyles.container}>
 
         <SearchBar
