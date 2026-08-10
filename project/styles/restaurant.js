@@ -527,9 +527,9 @@ const restaurantStyles = StyleSheet.create({
 
   actionBar: {
     position: "absolute",
-    top: SPACING.xl,
-    left: SPACING.lg,
-    right: SPACING.lg,
+    top: SPACING.md,
+    left: SPACING.md,
+    right: SPACING.md,
     flexDirection: "row",
     justifyContent: "space-between",
     zIndex: 100,

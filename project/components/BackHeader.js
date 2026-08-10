@@ -14,6 +14,8 @@ export default function BackHeader({
   title,
   subtitle,
   rightIcon,
+  rightText,
+  rightTextStyle,
   onRightPress,
 }) {
   const navigation = useNavigation();
@@ -52,6 +54,33 @@ export default function BackHeader({
       </View>
 
       {rightIcon ? (
+        <TouchableOpacity
+          style={commonStyles.headerRightButton}
+          onPress={onRightPress}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons
+            name={rightIcon}
+            size={24}
+            color={COLORS.primaryDark}
+          />
+        </TouchableOpacity>
+      ) : (
+        <View style={commonStyles.headerRightButton} />
+      )}
+
+      {rightText ? (
+        <TouchableOpacity
+          style={commonStyles.headerRightTextButton}
+          onPress={onRightPress}
+          activeOpacity={0.8}
+          disabled={!onRightPress}
+        >
+          <Text numberOfLines={1} style={rightTextStyle}>
+            {rightText}
+          </Text>
+        </TouchableOpacity>
+      ) : rightIcon ? (
         <TouchableOpacity
           style={commonStyles.headerRightButton}
           onPress={onRightPress}
