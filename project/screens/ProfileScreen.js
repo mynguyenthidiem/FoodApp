@@ -95,7 +95,7 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={profileStyles.email}>{currentUser?.email ?? ''}</Text>
         </View>
 
-        <View style={profileStyles.stats}>
+        {/* <View style={profileStyles.stats}>
           <View style={profileStyles.statBox}>
             <Text style={profileStyles.statNumber}>24</Text>
 
@@ -113,7 +113,8 @@ const ProfileScreen = ({ navigation }) => {
 
             <Text style={profileStyles.statLabel}>BADGES</Text>
           </View>
-        </View>
+        </View> */}
+
         <Text style={profileStyles.sectionTitle}>ACCOUNT SETTINGS</Text>
 
         <View style={profileStyles.settingsRow}>
