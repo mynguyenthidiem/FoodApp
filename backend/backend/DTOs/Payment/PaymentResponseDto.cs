@@ -13,6 +13,7 @@ public class PaymentResponseDto
     public string? TransactionId { get; set; }
 
     public DateTime CreatedAt { get; set; }
+    public OrderStatus OrderStatus { get; set; }
 }
 
 public class CompletePaymentDto

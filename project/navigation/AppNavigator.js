@@ -1,16 +1,18 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import SplashScreen from "../screens/SplashScreen";
-import LoginScreen from "../screens/LoginScreen";
-import RegisterScreen from "../screens/RegisterScreen";
-import OnboardingScreen from "../screens/OnboardingScreen";
-import FoodDetailScreen from "../screens/FoodDetailScreen";
-import CategoryScreen from "../screens/CategoryScreen";
-import RestaurantListScreen from "../screens/RestaurantListScreen";
-import RestaurantDetailScreen from "../screens/RestaurantDetailScreen";
-import SettingsScreen from "../screens/SettingsScreen";
-import EditProfileScreen from "../screens/EditProfileScreen";
-import MainTabs from "./MainTabs";
+import SplashScreen from '../screens/SplashScreen';
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import FoodDetailScreen from '../screens/FoodDetailScreen';
+import CategoryScreen from '../screens/CategoryScreen';
+import RestaurantListScreen from '../screens/RestaurantListScreen';
+import RestaurantDetailScreen from '../screens/RestaurantDetailScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
+import PaymentScreen from '../screens/PaymentScreen';
+import OrderSuccessScreen from '../screens/OrderSuccessScreen';
+import MainTabs from './MainTabs';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +31,8 @@ export default function AppNavigator() {
       <Stack.Screen name="RestaurantList" component={RestaurantListScreen} />
       <Stack.Screen name="RestaurantDetail"component={RestaurantDetailScreen} />
       <Stack.Screen name="FoodDetail" component={FoodDetailScreen} />
+      <Stack.Screen name="Payment" component={PaymentScreen} />      
+      <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>

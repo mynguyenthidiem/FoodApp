@@ -9,7 +9,10 @@ namespace backend.Repositories.Interfaces
         Task<Payment?> GetByOrderIdAsync(int orderId);
 
         Task<Payment?> GetPaymentWithOrderAsync(int orderId);
+
         Task<Payment?> GetByIdAsync(int id);
+
+        Task<Order?> GetOrderForPaymentAsync(int orderId);
 
         Task SaveChangesAsync();
     }

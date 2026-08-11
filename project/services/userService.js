@@ -1,21 +1,11 @@
 import api from "../api/client";
 
-// ======================================
-// GET USER BY ID
-// GET /api/User/{id}
-// ======================================
-
 export const getUserById = async (id) => {
   const response = await api.get(`/User/${id}`);
 
   return response.data;
 };
 
-// ======================================
-// UPDATE PROFILE
-// PUT /api/User/profile/{id}
-// multipart/form-data
-// ======================================
 export const updateProfile = async ({
   id,
   fullName,
