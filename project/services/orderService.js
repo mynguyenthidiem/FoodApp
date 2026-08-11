@@ -1,10 +1,5 @@
 import api from "../api/client";
 
-// ======================================
-// GET MY ORDERS
-// GET /api/orders
-// ======================================
-
 export const getOrders = async (
   pageNumber = 1,
   pageSize = 20
@@ -19,21 +14,11 @@ export const getOrders = async (
   return response.data;
 };
 
-// ======================================
-// GET ORDER DETAIL
-// GET /api/orders/{id}
-// ======================================
-
 export const getOrderById = async (id) => {
   const response = await api.get(`/orders/${id}`);
 
   return response.data;
 };
-
-// ======================================
-// CREATE ORDER
-// POST /api/orders
-// ======================================
 
 export const createOrder = async ({
   shippingAddress,
@@ -49,11 +34,6 @@ export const createOrder = async ({
   return response.data;
 };
 
-// ======================================
-// UPDATE ORDER
-// PUT /api/orders/{id}
-// ======================================
-
 export const updateOrder = async ({
   id,
   shippingAddress,
@@ -66,11 +46,6 @@ export const updateOrder = async ({
 
   return response.data;
 };
-
-// ======================================
-// CANCEL ORDER
-// DELETE /api/orders/{id}
-// ======================================
 
 export const cancelOrder = async (id) => {
   const response = await api.delete(`/orders/${id}`);

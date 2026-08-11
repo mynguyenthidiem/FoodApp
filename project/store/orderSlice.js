@@ -8,20 +8,12 @@ import {
   cancelOrder,
 } from "../services/orderService";
 
-// ======================================
-// GET MY ORDERS
-// ======================================
-
 export const fetchOrders = createAsyncThunk(
   "order/fetchOrders",
   async ({ pageNumber = 1, pageSize = 20 } = {}) => {
     return await getOrders(pageNumber, pageSize);
   }
 );
-
-// ======================================
-// GET ORDER DETAIL
-// ======================================
 
 export const fetchOrderById = createAsyncThunk(
   "order/fetchOrderById",
@@ -30,20 +22,12 @@ export const fetchOrderById = createAsyncThunk(
   }
 );
 
-// ======================================
-// CREATE ORDER
-// ======================================
-
 export const createOrderAsync = createAsyncThunk(
   "order/createOrder",
   async (data) => {
     return await createOrder(data);
   }
 );
-
-// ======================================
-// UPDATE ORDER
-// ======================================
 
 export const updateOrderAsync = createAsyncThunk(
   "order/updateOrder",
@@ -53,10 +37,6 @@ export const updateOrderAsync = createAsyncThunk(
     return await getOrderById(data.id);
   }
 );
-
-// ======================================
-// CANCEL ORDER
-// ======================================
 
 export const cancelOrderAsync = createAsyncThunk(
   "order/cancelOrder",
@@ -103,10 +83,6 @@ const orderSlice = createSlice({
   extraReducers: (builder) => {
     builder;
 
-    // ======================================
-    // FETCH ORDERS
-    // ======================================
-
     builder
       .addCase(fetchOrders.pending, (state) => {
         state.status = "loading";
@@ -133,10 +109,6 @@ const orderSlice = createSlice({
         state.error = action.error.message;
       });
 
-    // ======================================
-    // FETCH ORDER DETAIL
-    // ======================================
-
     builder
       .addCase(fetchOrderById.pending, (state) => {
         state.status = "loading";
@@ -156,10 +128,6 @@ const orderSlice = createSlice({
 
         state.error = action.error.message;
       });
-
-    // ======================================
-    // CREATE ORDER
-    // ======================================
 
     builder
       .addCase(createOrderAsync.pending, (state) => {
@@ -184,10 +152,6 @@ const orderSlice = createSlice({
 
         state.error = action.error.message;
       });
-
-    // ======================================
-    // UPDATE ORDER
-    // ======================================
 
     builder
       .addCase(updateOrderAsync.pending, (state) => {
@@ -216,10 +180,6 @@ const orderSlice = createSlice({
 
         state.error = action.error.message;
       });
-
-    // ======================================
-    // CANCEL ORDER
-    // ======================================
 
     builder
       .addCase(cancelOrderAsync.pending, (state) => {

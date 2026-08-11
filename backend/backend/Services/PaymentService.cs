@@ -1,9 +1,6 @@
-﻿using backend.Data;
-using backend.Models;
-using backend.Repositories;
+﻿using backend.Models;
 using backend.Repositories.Interfaces;
 using backend.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services
 {
@@ -16,18 +13,63 @@ namespace backend.Services
             _repo = repo;
         }
 
-        public async Task CreatePayment(int orderId, decimal amount, PaymentMethod method)
+        public async Task<Payment> CreatePayment(int orderId, int userId, PaymentMethod method)
         {
+            var order = await _repo.GetOrderForPaymentAsync(orderId);
+
+            if (order == null)
+            {
+                throw new KeyNotFoundException(
+                    "Order not found."
+                );
+            }
+            if (order.UserId != userId)
+            {
+                throw new UnauthorizedAccessException(
+                    "You are not authorized to pay for this order."
+                );
+            }
+             if (order.Status == OrderStatus.Cancelled)
+            {
+                throw new InvalidOperationException(
+                    "Cancelled orders cannot be paid."
+                );
+            }
+             if (order.Payment != null)
+            {
+                throw new InvalidOperationException(
+                    "This order already has a payment."
+                );
+            }
+            if (order.TotalAmount <= 0)
+            {
+                throw new InvalidOperationException(
+                    "Order amount must be greater than zero."
+                );
+            }
             var payment = new Payment
             {
-                OrderId = orderId,
-                Amount = amount,
+                OrderId = order.Id,
+                Amount = order.TotalAmount,
                 Method = method,
-                Status = PaymentStatus.Pending
-            };
+                Status = method == PaymentMethod.COD
+                    ? PaymentStatus.Pending
+                    : PaymentStatus.Completed,
+                TransactionId = method == PaymentMethod.COD
+                    ? null
+                    : $"DEMO-{Guid.NewGuid():N}",
 
-            await _repo.AddAsync(payment);
+                CreatedAt = DateTime.UtcNow
+            };
+            order.PaymentMethod = method;
+            if (order.Status == OrderStatus.Pending)
+            {
+                order.Status = OrderStatus.Confirmed;
+            }
+             await _repo.AddAsync(payment);
+
             await _repo.SaveChangesAsync();
+            return payment;
         }
 
         public async Task<Payment?> GetByOrderId(int orderId)
@@ -75,7 +117,11 @@ namespace backend.Services
             }
 
             payment.Status = PaymentStatus.Completed;
-            payment.TransactionId = transactionId;
+            payment.TransactionId =
+                string.IsNullOrWhiteSpace(transactionId)
+                    ? $"COD-{Guid.NewGuid():N}"
+                    : transactionId;
+            payment.Order.Status = OrderStatus.Completed;
 
             await _repo.SaveChangesAsync();
         }

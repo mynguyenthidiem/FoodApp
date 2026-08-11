@@ -12,9 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
-
 var builder = WebApplication.CreateBuilder(args);
 
 

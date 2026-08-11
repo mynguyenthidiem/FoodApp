@@ -32,7 +32,7 @@ namespace backend.Repositories
                 .Include(p => p.Order!)
                     .ThenInclude(o => o.Restaurant)
                 .Include(p => p.Order!)
-                    .ThenInclude(o => o.User) 
+                    .ThenInclude(o => o.User)
                 .FirstOrDefaultAsync(p => p.OrderId == orderId);
         }
 
@@ -41,6 +41,13 @@ namespace backend.Repositories
             return await _context.Payments
                 .Include(p => p.Order)
                 .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<Order?> GetOrderForPaymentAsync(int orderId)
+        {
+            return await _context.Orders
+                .Include(o => o.Payment)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
         }
 
         public async Task SaveChangesAsync()
