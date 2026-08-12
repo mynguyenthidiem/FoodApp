@@ -56,7 +56,6 @@ namespace backend.Models
     public enum PaymentMethod
     {
         COD,
-        VNPay,
-        MoMo
+        Online
     }
 }

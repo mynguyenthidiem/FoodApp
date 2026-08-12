@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import commonStyles from '../styles/common';
 import authStyles from '../styles/auth';
@@ -29,27 +30,45 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const handleAfterLogin = async () => {
+    const hasSeenOnboarding = await AsyncStorage.getItem(
+      'has_seen_onboarding',
+    );
 
+    if (hasSeenOnboarding === 'true') {
+      navigation.replace('MainTabs');
+    } else {
+      navigation.replace('Onboard');
+    }
+  };
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       Alert.alert('Error', 'Email and password are required.');
       return;
     }
+
     try {
       setLoading(true);
 
-      await dispatch(loginUser({ email, password })).unwrap();
+      await dispatch(
+        loginUser({
+          email: email.trim(),
+          password,
+        }),
+      ).unwrap();
 
-      navigation.replace('MainTabs');
+      await handleAfterLogin();
     } catch (err) {
-      console.log('FULL ERROR:', err);
+      console.log('FULL LOGIN ERROR:', err);
 
       Alert.alert(
         'Login Failed',
-        typeof err === 'string' ? err : JSON.stringify(err),
+        typeof err === 'string'
+          ? err
+          : err?.message || 'Invalid email or password.',
       );
     } finally {
-      setLoading(false);   // hiện tại cũng thiếu dòng này, nên nút Login bị kẹt "loading" khi lỗi
+      setLoading(false);
     }
   };
   const handleGoogleLogin = async () => {
@@ -64,7 +83,7 @@ export default function LoginScreen({ navigation }) {
 
       await dispatch(loginWithGoogle({ idToken })).unwrap();
 
-      navigation.replace('MainTabs');
+      await handleAfterLogin();
     } catch (err) {
       const message =
         err.response?.data?.message || err.message || 'Google Login Failed';

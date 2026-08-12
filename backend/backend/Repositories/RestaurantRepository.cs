@@ -14,7 +14,7 @@ namespace backend.Repositories
             _context = context;
         }
 
-        public async Task<(List<Restaurant> Items, int TotalCount)> GetAll(int pageNumber,int pageSize)
+        public async Task<(List<Restaurant> Items, int TotalCount)> GetAll(int pageNumber, int pageSize)
         {
             var query = _context.Restaurants
                 .Where(r => r.IsActive)
@@ -53,7 +53,58 @@ namespace backend.Repositories
             _context.Restaurants.Add(restaurant);
             await _context.SaveChangesAsync();
         }
+        public async Task<(List<Restaurant>, int)> SearchAsync(string keyword, int pageNumber, int pageSize)
+        {
+            var baseQuery = _context.Restaurants
+                .Where(r => r.IsActive &&
+                    (r.Name.Contains(keyword) || r.Address.Contains(keyword)));
 
+            var totalCount = await baseQuery.CountAsync();
+
+            var items = await baseQuery
+                .OrderBy(r => r.Name)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Include(r => r.Foods)
+                .Include(r => r.Categories).ThenInclude(c => c.SystemCategory)
+                .AsSplitQuery()
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+        public async Task<List<Restaurant>> GetTopRatedAsync(int count)
+        {
+            return await _context.Restaurants
+                .Include(r => r.Foods)
+                .Include(r => r.Categories).ThenInclude(c => c.SystemCategory)
+                .Where(r => r.IsActive)
+                .OrderByDescending(r => r.Rating)
+                .ThenByDescending(r => r.TotalReviews)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<(List<Restaurant>, int)> GetOpenNowAsync(TimeOnly currentTime, int pageNumber, int pageSize)
+        {
+            var query = _context.Restaurants
+                .Include(r => r.Foods)
+                .Include(r => r.Categories).ThenInclude(c => c.SystemCategory)
+                .Where(r => r.IsActive && (
+                    r.OpenTime <= r.CloseTime
+                        ? (currentTime >= r.OpenTime && currentTime <= r.CloseTime)
+                        : (currentTime >= r.OpenTime || currentTime <= r.CloseTime)
+                ));
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(r => r.Rating)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
         public async Task Update(Restaurant restaurant)
         {
             _context.Restaurants.Update(restaurant);

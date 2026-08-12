@@ -9,6 +9,7 @@ namespace backend.Services.Interfaces
         Task<SystemCategoryDto?> GetByIdAsync(int id);
 
         Task<SystemCategoryDto> CreateAsync(CreateSystemCategoryDto dto);
+        Task<List<SystemCategoryDto>> SearchAsync(string keyword);
 
         Task UpdateAsync(int id, UpdateSystemCategoryDto dto);
 

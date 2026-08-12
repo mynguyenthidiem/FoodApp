@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         color: COLORS.text,
-        marginBottom: SPACING.md,
+        marginVertical: SPACING.md,
     },
     settingsRow: {
         borderTopWidth: 2,

@@ -27,7 +27,13 @@ namespace backend.Repositories
             return await _context.SystemCategories
                 .FirstOrDefaultAsync(sc => sc.Id == id && sc.IsActive);
         }
-
+        public async Task<List<SystemCategory>> SearchAsync(string keyword)
+        {
+            return await _context.SystemCategories
+                .Where(c => c.IsActive && c.Name.Contains(keyword))
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+        }
         public async Task<SystemCategory> CreateAsync(SystemCategory systemCategory)
         {
             _context.SystemCategories.Add(systemCategory);

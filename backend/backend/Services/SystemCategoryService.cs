@@ -99,8 +99,19 @@ namespace backend.Services
                 Id = category.Id,
                 Name = category.Name,
                 Description = category.Description,
-                Image = string.IsNullOrEmpty(category.Image)? null: _urlService.GetAbsoluteUrl(category.Image)
+                Image = string.IsNullOrEmpty(category.Image) ? null : _urlService.GetAbsoluteUrl(category.Image)
             };
         }
+        public async Task<List<SystemCategoryDto>> SearchAsync(string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return await GetAllAsync();
+            }
+
+            var categories = await _repository.SearchAsync(keyword);
+            return categories.Select(MapToDto).ToList();
+        }
     }
+
 }

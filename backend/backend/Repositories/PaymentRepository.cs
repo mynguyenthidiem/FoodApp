@@ -23,6 +23,7 @@ namespace backend.Repositories
         public async Task<Payment?> GetByOrderIdAsync(int orderId)
         {
             return await _context.Payments
+                .Include(p => p.Order)
                 .FirstOrDefaultAsync(p => p.OrderId == orderId);
         }
 

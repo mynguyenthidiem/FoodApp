@@ -22,10 +22,14 @@ export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!fullName || !email || !password || !confirmPassword) {
-      Alert.alert('Required Fields', 'Please fill in all mandatory fields.');
+    if (!fullName.trim() || !email.trim() || !password || !confirmPassword) {
+      Alert.alert(
+        'Required Fields',
+        'Please fill in all mandatory fields.',
+      );
       return;
     }
+
     if (password !== confirmPassword) {
       Alert.alert(
         'Password Mismatch',
@@ -33,6 +37,7 @@ export default function RegisterScreen({ navigation }) {
       );
       return;
     }
+
     if (!agree) {
       Alert.alert(
         'Terms & Conditions',
@@ -43,22 +48,24 @@ export default function RegisterScreen({ navigation }) {
 
     try {
       setLoading(true);
+
       await register({
-        fullName,
-        email,
+        fullName: fullName.trim(),
+        email: email.trim(),
         password,
-        phone: phone || undefined,
+        phone: phone.trim() || null,
       });
 
-      Alert.alert(
-        'Success',
-        'Your account has been created successfully. You can log in now.',
-        [{ text: 'Log In', onPress: () => navigation.navigate('Login') }],
-      );
+
+      navigation.replace('Login');
     } catch (err) {
+      console.log('REGISTER ERROR:', err.response?.data);
+
       const message =
         err.response?.data?.message ||
-        'Failed to register. Please check your information or internet connection.';
+        err.response?.data?.title ||
+        'Failed to register. Please check your information.';
+
       Alert.alert('Registration Failed', message);
     } finally {
       setLoading(false);

@@ -1,4 +1,5 @@
 ﻿using backend.DTOs.SystemCategory;
+using backend.Services;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +43,13 @@ namespace backend.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
+        }
+        [AllowAnonymous]
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string keyword)
+        {
+            var result = await _service.SearchAsync(keyword);
+            return Ok(result);
         }
 
         [Authorize(Roles = "Admin")]

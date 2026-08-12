@@ -15,5 +15,8 @@ namespace backend.Repositories.Interfaces
         Task Delete(int id);
         Task UpdateRestaurantRatingAsync(int restaurantId);
         Task DeactivateAllByOwnerAsync(int ownerId);
+        Task<(List<Restaurant> Items, int TotalCount)> SearchAsync(string keyword, int pageNumber, int pageSize);
+        Task<List<Restaurant>> GetTopRatedAsync(int count);
+        Task<(List<Restaurant> Items, int TotalCount)> GetOpenNowAsync(TimeOnly currentTime, int pageNumber, int pageSize);
     }
 }

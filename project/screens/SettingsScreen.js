@@ -12,7 +12,7 @@ import profileStyles from '../styles/profile';
 import { COLORS } from '../styles/theme';
 import BackHeader from '../components/BackHeader';
 import { fetchCurrentUser, clearCurrentUser } from '../store/userSlice';
-
+import { logoutUser } from '../store/authSlice';
 import { removeToken } from '../utils/tokenStorage';
 
 const SettingsScreen = ({ navigation }) => {
@@ -26,21 +26,6 @@ const SettingsScreen = ({ navigation }) => {
     }
   }, [dispatch, currentUser, authUser?.id]);
 
-
-  const handleSignOut = async () => {
-    try {
-      // Xóa JWT/token
-      await removeToken();
-
-      // Xóa user khỏi Redux
-      dispatch(clearCurrentUser());
-
-      // Quay về Login
-      navigation.replace('Login');
-    } catch (error) {
-      console.warn('Sign out failed:', error);
-    }
-  };
 
   if (status === 'loading' && !currentUser) {
     return (
@@ -68,6 +53,11 @@ const SettingsScreen = ({ navigation }) => {
     );
   }
 
+  const handleSignOut = async () => {
+    logoutUser();
+    dispatch(clearCurrentUser());
+    navigation.navigate('Login');
+  }
 
   return (
     <SafeAreaView style={commonStyles.screen} edges={['top', 'left', 'right']}>

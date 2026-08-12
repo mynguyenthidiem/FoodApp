@@ -19,10 +19,6 @@ namespace backend.Controllers
             _paymentService = paymentService;
         }
 
-        // ============================================================
-        // GET CURRENT USER ID
-        // ============================================================
-
         private int GetCurrentUserId()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -37,10 +33,19 @@ namespace backend.Controllers
             return int.Parse(userId);
         }
 
-        // ============================================================
-        // CREATE PAYMENT
-        // POST: /api/payments
-        // ============================================================
+        private static PaymentResponseDto MapToDto(Payment payment)
+        {
+            return new PaymentResponseDto
+            {
+                Id = payment.Id,
+                OrderId = payment.OrderId,
+                Amount = payment.Amount,
+                Status = payment.Status,
+                TransactionId = payment.TransactionId,
+                CreatedAt = payment.CreatedAt,
+                OrderStatus = payment.Order?.Status ?? default
+            };
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreatePayment(
@@ -59,7 +64,7 @@ namespace backend.Controllers
                 return Ok(new
                 {
                     message = "Payment created successfully.",
-                    payment
+                    payment = MapToDto(payment)
                 });
             }
             catch (KeyNotFoundException ex)
@@ -92,11 +97,6 @@ namespace backend.Controllers
             }
         }
 
-        // ============================================================
-        // GET PAYMENT BY ORDER
-        // GET: /api/payments/order/{orderId}
-        // ============================================================
-
         [HttpGet("order/{orderId}")]
         public async Task<IActionResult> GetPaymentByOrder(int orderId)
         {
@@ -112,7 +112,7 @@ namespace backend.Controllers
                     });
                 }
 
-                return Ok(payment);
+                return Ok(MapToDto(payment));
             }
             catch (Exception)
             {
@@ -125,11 +125,6 @@ namespace backend.Controllers
                 );
             }
         }
-
-        // ============================================================
-        // COMPLETE COD PAYMENT
-        // PUT: /api/payments/{orderId}/complete
-        // ============================================================
 
         [Authorize(Roles = "Owner")]
         [HttpPut("{orderId}/complete")]
@@ -181,11 +176,6 @@ namespace backend.Controllers
                 );
             }
         }
-
-        // ============================================================
-        // FAIL PAYMENT
-        // PUT: /api/payments/{orderId}/fail
-        // ============================================================
 
         [Authorize(Roles = "Owner")]
         [HttpPut("{orderId}/fail")]

@@ -21,6 +21,7 @@ import { fetchRestaurantById } from '../store/restaurantSlice';
 import { fetchFoods } from '../store/foodSlice';
 import { fetchFoodReviews } from '../store/reviewSlice';
 import { fetchCart, addCartItem } from '../store/cartSlice';
+import { toggleRestaurantFavorite } from '../store/favoriteSlice';
 
 export default function RestaurantDetailScreen({ navigation, route }) {
   const { restaurantId } = route.params ?? {};
@@ -38,7 +39,7 @@ export default function RestaurantDetailScreen({ navigation, route }) {
 
   const [selectedTab, setSelectedTab] = useState('Menu');
   const [selectedFilter, setSelectedFilter] = useState('all');
-
+  const favoriteRestaurantIds = useSelector(state => state.favorite.restaurantIds);
   useEffect(() => {
     if (!restaurantId) return;
     dispatch(fetchRestaurantById(restaurantId));
@@ -159,26 +160,24 @@ export default function RestaurantDetailScreen({ navigation, route }) {
   if (loading) {
     return (
       <SafeAreaView style={commonStyles.screen} edges={['top', 'bottom']}>
-        {' '}
         <View
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          {' '}
-          <ActivityIndicator size="large" />{' '}
-        </View>{' '}
+          <ActivityIndicator size="large" />
+        </View>
       </SafeAreaView>
     );
   }
   if (!restaurant) {
     return (
       <SafeAreaView style={commonStyles.screen} edges={['top', 'bottom']}>
-        {' '}
+
         <View
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          {' '}
-          <Text> Restaurant not found. </Text>{' '}
-        </View>{' '}
+
+          <Text> Restaurant not found. </Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -194,9 +193,10 @@ export default function RestaurantDetailScreen({ navigation, route }) {
       >
         <RestaurantHeroCard
           restaurant={restaurant}
+          favorite={favoriteRestaurantIds.includes(restaurant.id)}
           onBackPress={() => navigation.goBack()}
-          onSharePress={() => {}}
-          onFavoritePress={() => {}}
+          onSharePress={() => { }}
+          onFavoritePress={() => dispatch(toggleRestaurantFavorite(restaurant.id))}
         />
 
         <RestaurantTabs
@@ -229,7 +229,7 @@ export default function RestaurantDetailScreen({ navigation, route }) {
                 key={section.id}
                 category={section.title}
                 items={section.items}
-                onFoodPress={food =>
+                onPress={food =>
                   navigation.navigate('FoodDetail', {
                     foodId: food.id,
                   })
@@ -265,7 +265,9 @@ export default function RestaurantDetailScreen({ navigation, route }) {
         quantity={cartQuantity}
         total={cartTotal}
         bottom={insets.bottom}
-        onPress={() => navigation.navigate('Cart')}
+        onPress={() => navigation.navigate('MainTabs', {
+          screen: 'Cart',
+        })}
       />
     </SafeAreaView>
   );

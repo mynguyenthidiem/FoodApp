@@ -17,11 +17,11 @@ import commonStyles from '../styles/common';
 import orderStyles from '../styles/order';
 import { COLORS } from '../styles/theme';
 
-import { createOrderAsync, clearCurrentOrder } from '../redux/orderSlice';
+import { createOrderAsync, clearCurrentOrder } from '../store/orderSlice';
 
-import { fetchCurrentUser } from '../redux/userSlice';
+import { fetchCurrentUser } from '../store/userSlice';
 
-import { fetchCart } from '../redux/cartSlice';
+import { fetchCart } from '../store/cartSlice';
 
 const CheckoutScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -45,7 +45,7 @@ const CheckoutScreen = ({ navigation, route }) => {
       state.user?.currentUser?.id,
   );
 
-  const [paymentMethod, setPaymentMethod] = useState('Cash');
+  const [paymentMethod, setPaymentMethod] = useState('COD');
 
   const [shippingAddress, setShippingAddress] = useState('');
 
@@ -175,29 +175,20 @@ const CheckoutScreen = ({ navigation, route }) => {
         }),
       ).unwrap();
 
+      // Reload cart after order is created
       dispatch(fetchCart());
 
-      Alert.alert(
-        'Order placed',
-        'Your order has been placed successfully.',
-        [
-          {
-            text: 'View order',
-            onPress: () => {
-              if (result?.id) {
-                navigation.replace('OrderDetail', {
-                  orderId: result.id,
-                });
-              } else {
-                navigation.replace('MyOrders');
-              }
-            },
-          },
-        ],
-        {
-          cancelable: false,
-        },
-      );
+      // Go directly to OrderSuccess
+      if (result?.id) {
+        navigation.replace('OrderSuccess', {
+          orderId: result.id,
+        });
+      } else {
+        Alert.alert(
+          'Order created',
+          'Your order was created, but the order ID could not be found.',
+        );
+      }
     } catch (error) {
       setHasSubmitted(false);
 
@@ -205,11 +196,11 @@ const CheckoutScreen = ({ navigation, route }) => {
         'Unable to place order',
         typeof error === 'string'
           ? error
-          : error?.message || 'Something went wrong while creating your order.',
+          : error?.message ||
+          'Something went wrong while creating your order.',
       );
     }
   };
-
   // Loading user
 
   if (userStatus === 'loading' && !currentUser) {
@@ -299,7 +290,7 @@ const CheckoutScreen = ({ navigation, route }) => {
 
             <TouchableOpacity
               style={orderStyles.changeButton}
-              onPress={() => navigation.navigate('Profile')}
+              onPress={() => navigation.navigate('EditProfile') }
             >
               <Text style={orderStyles.changeButtonText}>Change</Text>
             </TouchableOpacity>
@@ -320,7 +311,7 @@ const CheckoutScreen = ({ navigation, route }) => {
           <View style={orderStyles.checkoutCard}>
             <TouchableOpacity
               style={orderStyles.paymentOption}
-              onPress={() => handleSelectPayment('Cash')}
+              onPress={() => handleSelectPayment('COD')}
             >
               <View style={orderStyles.paymentIcon}>
                 <MaterialCommunityIcons
@@ -341,10 +332,10 @@ const CheckoutScreen = ({ navigation, route }) => {
               <View
                 style={[
                   orderStyles.radioOuter,
-                  paymentMethod === 'Cash' && orderStyles.radioOuterSelected,
+                  paymentMethod === 'COD' && orderStyles.radioOuterSelected,
                 ]}
               >
-                {paymentMethod === 'Cash' && (
+                {paymentMethod === 'COD' && (
                   <View style={orderStyles.radioInner} />
                 )}
               </View>

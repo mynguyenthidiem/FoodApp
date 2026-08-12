@@ -48,6 +48,31 @@ const homeStyles = StyleSheet.create({
     color: COLORS.primaryDark,
   },
 
+  notificationWrapper: {
+    position: 'relative',
+  },
+
+  notificationBadge: {
+    position: 'absolute',
+    top: 2,
+    right:50,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 3,
+    borderWidth: 1,
+    borderColor: COLORS.white,
+  },
+
+  notificationBadgeText: {
+    color: COLORS.white,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+
   // SEARCH BAR
 
   searchContainer: {

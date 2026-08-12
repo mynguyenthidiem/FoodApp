@@ -14,13 +14,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import commonStyles from '../styles/common';
 import profileStyles from '../styles/profile';
-import { fetchCurrentUser } from '../store/userSlice';
+import {
+  fetchCurrentUser,
+  clearCurrentUser,
+} from '../store/userSlice';
 import { resolveImage } from '../utils/imageUrl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SettingRow from '../components/SettingRow';
 import BackHeader from '../components/BackHeader';
 import { COLORS } from '../styles/theme';
-
+import { logoutUser } from '../store/authSlice';
 const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
 
@@ -57,7 +60,17 @@ const ProfileScreen = ({ navigation }) => {
       </SafeAreaView>
     );
   }
+  const handleSignOut = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
 
+      dispatch(clearCurrentUser());
+
+      navigation.replace('Login');
+    } catch (err) {
+      console.log('LOGOUT ERROR:', err);
+    }
+  };
   return (
     <SafeAreaView style={commonStyles.screen} edges={['top', 'left', 'right']}>
       <BackHeader title="Profile" />
@@ -136,7 +149,7 @@ const ProfileScreen = ({ navigation }) => {
             onPress={() => { }}
           />
 
-          <SettingRow icon="heart-outline" label="Favorites" onPress={() => { }} />
+          <SettingRow icon="heart-outline" label="Favorites" onPress={() => { navigation.navigate('Favorites'); }} />
         </View>
 
         <Text style={profileStyles.sectionTitle}>SUPPORT</Text>
@@ -154,7 +167,7 @@ const ProfileScreen = ({ navigation }) => {
             onPress={() => { }}
           />
         </View>
-        <TouchableOpacity style={profileStyles.logoutButton} onPress={() => { }}>
+        <TouchableOpacity style={profileStyles.logoutButton} onPress={handleSignOut}>
           <MaterialCommunityIcons name="logout" size={20} color="#b30000" />
 
           <Text style={profileStyles.logoutText}>Logout</Text>

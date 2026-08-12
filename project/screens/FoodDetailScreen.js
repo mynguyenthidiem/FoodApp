@@ -178,15 +178,15 @@ export default function FoodDetailScreen({ navigation, route }) {
           resizeMode="cover"
         />
         <View style={foodDetailStyles.content}>
-         <RestaurantBadge
-  text={
-    restaurant
-      ? restaurant.isActive
-        ? "Open"
-        : "Closed"
-      : "Loading..."
-  }
-/> 
+          <RestaurantBadge
+            text={
+              restaurant
+                ? restaurant.isActive
+                  ? "Open"
+                  : "Closed"
+                : "Loading..."
+            }
+          />
           <Text style={foodDetailStyles.name}>{food.name}</Text>
 
           <View style={foodDetailStyles.infoRow}>
@@ -203,7 +203,11 @@ export default function FoodDetailScreen({ navigation, route }) {
                 color={COLORS.primary}
               />
 
-              <Text style={foodDetailStyles.infoText}>{restaurant?.deliveryTime}</Text>
+              <Text style={foodDetailStyles.infoText}>
+                {restaurant?.openTime && restaurant?.closeTime
+                  ? `${restaurant.openTime.slice(0, 5)} - ${restaurant.closeTime.slice(0, 5)}`
+                  : '--'}
+              </Text>
             </View>
 
             <View style={foodDetailStyles.infoChip}>
@@ -231,15 +235,15 @@ export default function FoodDetailScreen({ navigation, route }) {
             </View>
           )}
 
-            <View style={foodDetailStyles.categoryRow}>
-              <MaterialCommunityIcons
-                name="map-marker-outline"
-                size={18}
-                color={COLORS.primary}
-              />
+          <View style={foodDetailStyles.categoryRow}>
+            <MaterialCommunityIcons
+              name="map-marker-outline"
+              size={18}
+              color={COLORS.primary}
+            />
 
-              <Text style={foodDetailStyles.categoryText}>{restaurant?.address}</Text>
-            </View>
+            <Text style={foodDetailStyles.categoryText}>{restaurant?.address}</Text>
+          </View>
 
           {!!food.categoryName && (
             <View style={foodDetailStyles.categoryRow}>
@@ -336,7 +340,18 @@ export default function FoodDetailScreen({ navigation, route }) {
           </View>
           <CustomButton
             title={`Add to Cart • $${totalPrice.toFixed(2)}`}
-            onPress={()=>{navigation.navigate("Cart");dispatch(addCartItem({foodId:food.id,quantity}))}}
+            onPress={async () => {
+              await dispatch(
+                addCartItem({
+                  foodId: food.id,
+                  quantity,
+                }),
+              );
+
+              navigation.navigate("MainTabs", {
+                screen: "Cart",
+              });
+            }}
           />
           {relatedFoods.length > 0 && (
             <>
