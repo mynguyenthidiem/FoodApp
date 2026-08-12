@@ -12,6 +12,9 @@ import SettingsScreen from '../screens/SettingsScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import OrderSuccessScreen from '../screens/OrderSuccessScreen';
+import NotificationScreen from '../screens/NotificationScreen';
+import CheckoutScreen from '../screens/CheckoutScreen';
+import FavoritesScreen from '../screens/FavoritesScreen';
 import MainTabs from './MainTabs';
 
 const Stack = createNativeStackNavigator();
@@ -31,13 +34,13 @@ export default function AppNavigator() {
       <Stack.Screen name="RestaurantList" component={RestaurantListScreen} />
       <Stack.Screen name="RestaurantDetail"component={RestaurantDetailScreen} />
       <Stack.Screen name="FoodDetail" component={FoodDetailScreen} />
-      <Stack.Screen name="Payment" component={PaymentScreen} />      
+      <Stack.Screen name="Payment" component={PaymentScreen} /> 
+      <Stack.Screen name="Checkout" component={CheckoutScreen} />     
       <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="Notifications" component={NotificationScreen} />
-      <Stack.Screen name="Profile" component={ProfileScreen} />
-      <Stack.Screen name="Cart" component={CartScreen} />
+      <Stack.Screen name="Favorites" component={FavoritesScreen} />
     </Stack.Navigator>
   );
 }

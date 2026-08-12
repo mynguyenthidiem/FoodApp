@@ -9,6 +9,10 @@ import BackHeader from '../components/BackHeader';
 import FilterChip from '../components/FilterChip';
 import RestaurantListCard from '../components/RestaurantListCard';
 import { fetchRestaurants } from '../store/restaurantSlice';
+import {
+  toggleRestaurantFavorite,
+  fetchFavoriteRestaurants,
+} from '../store/favoriteSlice';
 
 export default function RestaurantListScreen({ navigation, route }) {
   const { categoryName, filter } = route.params ?? {};
@@ -18,9 +22,17 @@ export default function RestaurantListScreen({ navigation, route }) {
   const error = useSelector(state => state.restaurant.error);
   const filters = ['All', 'Top Rated'];
   const [selectedFilter, setSelectedFilter] = useState(filter || 'All');
+  const favoriteRestaurantIds = useSelector(
+    state => state.favorite.restaurantIds,
+  );
+
+  const handleFavorite = restaurant => {
+    dispatch(toggleRestaurantFavorite(restaurant.id));
+  };
 
   useEffect(() => {
     dispatch(fetchRestaurants({ pageNumber: 1, pageSize: 100 }));
+    dispatch(fetchFavoriteRestaurants({ pageNumber: 1, pageSize: 100 }));
   }, [dispatch]);
   const filteredRestaurants = useMemo(() => {
     let result = [...restaurants];
@@ -114,11 +126,13 @@ export default function RestaurantListScreen({ navigation, route }) {
             <RestaurantListCard
               key={restaurant.id}
               item={restaurant}
+              favorite={favoriteRestaurantIds.includes(restaurant.id)}
               onPress={() =>
                 navigation.navigate('RestaurantDetail', {
                   restaurantId: restaurant.id,
                 })
               }
+              onFavoritePress={() => handleFavorite(restaurant)}
             />
           ))
         )}

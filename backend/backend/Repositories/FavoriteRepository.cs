@@ -41,21 +41,29 @@ namespace backend.Repositories
             return true;
         }
 
-        public async Task<(List<Food> Items, int TotalCount)> GetFavoriteFoodsAsync(int userId, int pageNumber, int pageSize)
+        public async Task<(List<Food> Items, int TotalCount)> GetFavoriteFoodsAsync(
+            int userId,
+            int pageNumber,
+            int pageSize)
         {
             var query = _context.FavoriteFoods
                 .Where(ff => ff.UserId == userId)
+                .Include(ff => ff.Food)
+                    .ThenInclude(f => f.Category)
+                        .ThenInclude(c => c.SystemCategory)
+                .Include(ff => ff.Food)
+                    .ThenInclude(f => f.Restaurant)
                 .OrderByDescending(ff => ff.CreatedAt)
-                .Select(ff => ff.Food)
-                .Include(f => f.Category)
-                    .ThenInclude(c => c.SystemCategory)
-                .Include(f => f.Restaurant)
                 .AsNoTracking();
 
             var totalCount = await query.CountAsync();
-            var items = await query.Skip((pageNumber - 1) * pageSize)
-                                    .Take(pageSize)
-                                    .ToListAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(ff => ff.Food)
+                .ToListAsync();
+
             return (items, totalCount);
         }
 
@@ -88,19 +96,27 @@ namespace backend.Repositories
 
         public async Task<(List<Restaurant> Items, int TotalCount)> GetFavoriteRestaurantsAsync(int userId, int pageNumber, int pageSize)
         {
-            var query = _context.FavoriteRestaurants
-                .Where(fr => fr.UserId == userId)
+            var baseQuery = _context.FavoriteRestaurants
+                .Where(fr => fr.UserId == userId);
+
+            var totalCount = await baseQuery.CountAsync();
+
+            // Query lấy dữ liệu
+            var query = baseQuery
+                .Include(fr => fr.Restaurant)
+                    .ThenInclude(r => r.Foods.Where(f => f.Status == FoodStatus.Available))
+                .Include(fr => fr.Restaurant)
+                    .ThenInclude(r => r.Categories.Where(c => c.IsActive))
+                        .ThenInclude(c => c.SystemCategory)
                 .OrderByDescending(fr => fr.CreatedAt)
-                .Select(fr => fr.Restaurant)
-                .Include(r => r.Foods.Where(f => f.Status == FoodStatus.Available))
-                .Include(r => r.Categories.Where(c => c.IsActive))
-                    .ThenInclude(c => c.SystemCategory)
                 .AsNoTracking();
 
-            var totalCount = await query.CountAsync();
-            var items = await query.Skip((pageNumber - 1) * pageSize)
-                                    .Take(pageSize)
-                                    .ToListAsync();
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(fr => fr.Restaurant)
+                .ToListAsync();
+
             return (items, totalCount);
         }
     }

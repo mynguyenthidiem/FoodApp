@@ -21,8 +21,8 @@ namespace backend.Services
 
         public async Task<PagedResultDto<RestaurantDto>> GetAll(PaginationParams pagination)
         {
-            var (items, totalCount) = await _repository.GetAll(pagination.PageNumber,pagination.PageSize);
-            return new PagedResultDto<RestaurantDto>(items.Select(MapToDto).ToList(), totalCount, pagination.PageNumber,pagination.PageSize);
+            var (items, totalCount) = await _repository.GetAll(pagination.PageNumber, pagination.PageSize);
+            return new PagedResultDto<RestaurantDto>(items.Select(MapToDto).ToList(), totalCount, pagination.PageNumber, pagination.PageSize);
         }
 
         public async Task<RestaurantDto?> GetById(int id)
@@ -117,7 +117,7 @@ namespace backend.Services
             await _repository.Update(restaurant);
         }
 
-        public async Task SetActiveStatus (int id, bool isActive)
+        public async Task SetActiveStatus(int id, bool isActive)
         {
             var restaurant = await _repository.GetById(id);
             if (restaurant == null)
@@ -127,8 +127,26 @@ namespace backend.Services
             restaurant.IsActive = isActive;
             await _repository.Update(restaurant);
         }
+        public async Task<PagedResultDto<RestaurantDto>> SearchAsync(string keyword, PaginationParams pagination)
+        {
+            var (items, totalCount) = await _repository.SearchAsync(keyword, pagination.PageNumber, pagination.PageSize);
+            return new PagedResultDto<RestaurantDto>(items.Select(MapToDto).ToList(), totalCount, pagination.PageNumber, pagination.PageSize);
+        }
 
-        private  RestaurantDto MapToDto(Restaurant restaurant)
+        public async Task<List<RestaurantDto>> GetTopRatedAsync(int count = 10)
+        {
+            var items = await _repository.GetTopRatedAsync(count);
+            return items.Select(MapToDto).ToList();
+        }
+
+        public async Task<PagedResultDto<RestaurantDto>> GetOpenNowAsync(PaginationParams pagination)
+        {
+            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+            var (items, totalCount) = await _repository.GetOpenNowAsync(currentTime, pagination.PageNumber, pagination.PageSize);
+            return new PagedResultDto<RestaurantDto>(items.Select(MapToDto).ToList(), totalCount, pagination.PageNumber, pagination.PageSize);
+        }
+
+        private RestaurantDto MapToDto(Restaurant restaurant)
         {
             return new RestaurantDto
             {

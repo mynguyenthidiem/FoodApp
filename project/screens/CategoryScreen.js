@@ -28,11 +28,11 @@ export default function CategoryScreen({ navigation }) {
       setLoading(true);
 
       const categoryResponse = await getSystemCategories();
-      const restaurantResponse = await getAllRestaurants(1,100);
+      const restaurantResponse = await getAllRestaurants(1, 100);
 
       const categoryData = categoryResponse ?? [];
       const restaurantData = restaurantResponse?.items ?? [];
-
+      
       setCategories(categoryData);
       setAllCategories(categoryData);
       setRestaurants(restaurantData);
@@ -46,7 +46,6 @@ export default function CategoryScreen({ navigation }) {
   useEffect(() => {
     loadData();
   }, []);
-
   const handleFilter = filter => {
     setSelectedFilter(filter);
 

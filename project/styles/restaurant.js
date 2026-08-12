@@ -123,7 +123,11 @@ const restaurantStyles = StyleSheet.create({
     alignItems: "center",
     marginBottom: SPACING.sm,
   },
-
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.sm,
+  },
   infoText: {
     marginLeft: SPACING.xs,
     marginRight: SPACING.md,

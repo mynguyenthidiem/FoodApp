@@ -1,4 +1,5 @@
 ﻿using backend.DTOs.Auth;
+using backend.DTOs.Notification;
 using backend.Models;
 using backend.Repositories.Interfaces;
 using backend.Services.Interfaces;
@@ -14,11 +15,12 @@ namespace backend.Services
     {
         private readonly IUserRepository _repo;
         private readonly IConfiguration _config;
-
-        public AuthService(IUserRepository repo, IConfiguration config)
+        private readonly INotificationService _notificationService;
+        public AuthService(IUserRepository repo, IConfiguration config, INotificationService notificationService)
         {
             _repo = repo;
             _config = config;
+            _notificationService = notificationService;
         }
 
         public async Task<AuthResponseDto> Register(RegisterDto dto)
@@ -49,6 +51,16 @@ namespace backend.Services
                     RoleId = role.Id
                 });
             }
+
+            await _notificationService.Create(new CreateNotificationRequest
+            {
+                UserId = createdUser.Id,
+                Title = "Welcome to FoodApp!",
+                Message = "Your account has been created successfully. Welcome to FoodApp!",
+                Type = NotificationType.System,
+                RelatedEntityId = null
+            });
+
             return new AuthResponseDto
             {
                 Success = true,
@@ -136,6 +148,14 @@ namespace backend.Services
                 {
                     throw new InvalidOperationException("Failed to load Google user.");
                 }
+                await _notificationService.Create(new CreateNotificationRequest
+                {
+                    UserId = user.Id,
+                    Title = "Welcome to FoodApp!",
+                    Message = "Welcome to FoodApp! Your account has been created successfully.",
+                    Type = NotificationType.System,
+                    RelatedEntityId = null
+                });
             }
 
             // Kiểm tra tài khoản
@@ -228,7 +248,7 @@ namespace backend.Services
                 Phone = user.Phone,
                 Address = user.Address,
                 Avatar = user.Avatar,
-                Roles =user.UserRoles
+                Roles = user.UserRoles
                     .Where(x => x.Role != null)
                     .Select(x => x.Role!.Name)
                     .ToList()

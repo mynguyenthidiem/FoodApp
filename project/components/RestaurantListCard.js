@@ -18,6 +18,7 @@ import { resolveImage } from "../utils/imageUrl";
 
 export default function RestaurantListCard({
   item,
+  favorite,
   onPress,
   onFavoritePress,
 }) {
@@ -36,7 +37,7 @@ export default function RestaurantListCard({
         />
 
         <FavoriteButton
-          favorite={false}
+          favorite={favorite}
           onPress={onFavoritePress}
         />
       </View>

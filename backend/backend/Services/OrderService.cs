@@ -1,5 +1,6 @@
-﻿using backend.DTOs.Page;
+﻿using backend.DTOs.Notification;
 using backend.DTOs.Order;
+using backend.DTOs.Page;
 using backend.Models;
 using backend.Repositories.Interfaces;
 using backend.Services.Interfaces;
@@ -10,11 +11,12 @@ namespace backend.Services
     {
         private readonly IOrderRepository _repository;
         private readonly IPaymentService _paymentService;
-
-        public OrderService(IOrderRepository repository, IPaymentService paymentService)
+        private readonly INotificationService _notificationService;
+        public OrderService(IOrderRepository repository, IPaymentService paymentService, INotificationService notificationService)
         {
             _repository = repository;
             _paymentService = paymentService;
+            _notificationService = notificationService;
         }
 
         public async Task<PagedResultDto<OrderDto>> GetOrdersAsync(int userId, PaginationParams pagination)
@@ -118,13 +120,20 @@ namespace backend.Services
 
                     await _repository.AddOrderDetailAsync(orderDetail);
                 }
-
+                await _notificationService.Create(new CreateNotificationRequest
+                {
+                    UserId = userId,
+                    Title = "Order Placed",
+                    Message = $"Your order #{order.Id} has been placed successfully.",
+                    Type = NotificationType.OrderCreated,
+                    RelatedEntityId = order.Id
+                });
                 order.TotalAmount = totalAmount + order.DeliveryFee;
 
                 await _repository.ClearSelectedCartAsync(userId, dto.CartIds);
                 await _repository.SaveChangesAsync();
 
-                await _paymentService.CreatePayment(order.Id, order.TotalAmount, dto.PaymentMethod);
+                await _paymentService.CreatePayment(order.Id, userId, dto.PaymentMethod);
 
                 await transaction.CommitAsync();
 
@@ -233,6 +242,14 @@ namespace backend.Services
 
 
             order.Status = dto.Status;
+            await _notificationService.Create(new CreateNotificationRequest
+            {
+                UserId = order.UserId,
+                Title = "Order Status Updated",
+                Message = $"Your order #{order.Id} is now {dto.Status}.",
+                Type = NotificationType.OrderStatusChanged,
+                RelatedEntityId = order.Id
+            });
 
             await _repository.UpdateOrderAsync(order);
         }

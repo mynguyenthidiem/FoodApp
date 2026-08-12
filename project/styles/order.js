@@ -33,7 +33,7 @@ const orderStyles = StyleSheet.create({
   },
 
   cartTitle: {
-    fontSize: FONT.body,
+    fontSize: FONT.label,
     fontWeight: '700',
 
     color: COLORS.heading,
@@ -455,6 +455,208 @@ const orderStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.xl,
+  },
+
+  // order success screen
+  confirmedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+
+    borderRadius: RADIUS.pill,
+
+    backgroundColor: COLORS.tertiary,
+
+    marginBottom: SPACING.md,
+  },
+
+  confirmedBadgeText: {
+    marginLeft: SPACING.xs,
+
+    fontSize: FONT.small,
+    fontWeight: '700',
+    color: COLORS.white,
+  },
+
+  secondaryButton: {
+    width: '100%',
+    height: 55,
+
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    backgroundColor: COLORS.secondary,
+
+    borderRadius: RADIUS.pill,
+
+    marginTop: SPACING.md,
+  },
+
+  secondaryButtonText: {
+    fontSize: FONT.subtitle,
+    fontWeight: '700',
+    color: COLORS.primaryDark,
+  },
+
+  // my order screen
+  ordersHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+
+  ordersAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: RADIUS.circle,
+    marginRight: SPACING.md,
+  },
+
+  ordersHeaderTitle: {
+    fontSize: FONT.h2,
+    fontWeight: '700',
+    color: COLORS.primaryDark,
+  },
+
+  ordersTabContainer: {
+    flexDirection: 'row',
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.lg,
+    backgroundColor: COLORS.secondary,
+    borderRadius: RADIUS.pill,
+    padding: 4,
+  },
+
+  ordersTab: {
+    flex: 1,
+    paddingVertical: SPACING.sm,
+    alignItems: 'center',
+    borderRadius: RADIUS.pill,
+  },
+
+  ordersTabActive: {
+    backgroundColor: COLORS.primary,
+  },
+
+  ordersTabText: {
+    fontSize: FONT.small,
+    color: COLORS.text,
+    fontWeight: '600',
+  },
+
+  ordersTabTextActive: {
+    color: COLORS.white,
+  },
+
+  ordersListContent: {
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.xl,
+  },
+
+  orderListCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    ...SHADOW,
+  },
+
+  orderListTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  orderListImage: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.md,
+  },
+
+  orderListInfo: {
+    flex: 1,
+    marginLeft: SPACING.md,
+  },
+
+  orderListRestaurant: {
+    fontSize: FONT.body,
+    fontWeight: '700',
+    color: COLORS.heading,
+  },
+
+  orderListMeta: {
+    fontSize: FONT.caption,
+    color: COLORS.neutral,
+    marginTop: 2,
+  },
+  orderListIconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  orderStatusBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.pill,
+  },
+
+  orderStatusText: {
+    fontSize: FONT.caption,
+    color: COLORS.white,
+    fontWeight: '600',
+  },
+
+  orderListDivider: {
+    height: 1,
+    backgroundColor: COLORS.divider,
+    marginVertical: SPACING.sm,
+  },
+
+  orderListBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  orderEstimatedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  orderEstimatedText: {
+    marginLeft: SPACING.xs,
+    fontSize: FONT.small,
+    color: COLORS.text,
+  },
+
+  orderTrackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  orderTrackText: {
+    fontSize: FONT.small,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+
+  ordersEmptyContainer: {
+    alignItems: 'center',
+    marginTop: 64,
+  },
+
+  ordersEmptyText: {
+    marginTop: SPACING.md,
+    fontSize: FONT.body,
+    color: COLORS.neutral,
   },
 });
 

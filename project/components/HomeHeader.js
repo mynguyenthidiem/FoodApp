@@ -6,7 +6,7 @@ import { Avatar, IconButton } from "react-native-paper";
 import homeStyles from "../styles/home";
 import { COLORS } from "../styles/theme";
 
-export default function HomeHeader({ appName, location, avatar, onNotificationPress, onProfilePress, }) {
+export default function HomeHeader({ appName, location, avatar, unreadCount, onNotificationPress, onProfilePress, }) {
   return (
     <View style={homeStyles.headerContainer}>
       <View style={homeStyles.headerContent}>
@@ -33,6 +33,14 @@ export default function HomeHeader({ appName, location, avatar, onNotificationPr
               size={24}
               onPress={onNotificationPress}
             />
+
+            {unreadCount > 0 && (
+                <View style={homeStyles.notificationBadge}>
+                  <Text style={homeStyles.notificationBadgeText}>
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Text>
+                </View>
+              )}
             <TouchableOpacity onPress={onProfilePress}>
               <Avatar.Image
                 size={42}

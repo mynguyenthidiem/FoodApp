@@ -8,6 +8,7 @@ import DrinkItemCard from "./DrinkItemCard";
 export default function MenuSection({
     category,
     items,
+    onPress,
     onAddPress,
 }) {
 
@@ -24,21 +25,23 @@ export default function MenuSection({
 
                 item.category === "drinks"
 
-                ?
+                    ?
 
-                <DrinkItemCard
-                    key={item.id}
-                    item={item}
-                    onAddPress={() => onAddPress(item)}
-                />
+                    <DrinkItemCard
+                        key={item.id}
+                        item={item}
+                        onPress={() => onPress?.(item)}
+                        onAddPress={() => onAddPress(item)}
+                    />
 
-                :
+                    :
 
-                <MenuItemCard
-                    key={item.id}
-                    item={item}
-                    onAddPress={() => onAddPress(item)}
-                />
+                    <MenuItemCard
+                        key={item.id}
+                        item={item}
+                        onPress={() => onPress?.(item)}
+                        onAddPress={() => onAddPress(item)}
+                    />
 
             )}
 

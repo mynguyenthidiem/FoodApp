@@ -1,6 +1,7 @@
 ﻿using backend.DTOs.Page;
 using backend.DTOs.Restaurant;
 using backend.Repositories.Interfaces;
+using backend.Services;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -50,7 +51,7 @@ namespace backend.Controllers
                     message = ex.Message
                 });
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
@@ -140,21 +141,21 @@ namespace backend.Controllers
             {
                 return Forbid();
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> SetActiveStatus (int id, [FromBody] bool isActive)
+        public async Task<IActionResult> SetActiveStatus(int id, [FromBody] bool isActive)
         {
             try
             {
                 await _service.SetActiveStatus(id, isActive);
                 return Ok(new { message = isActive ? "Restaurant activated." : "Restaurant deactivated." });
             }
-            catch(KeyNotFoundException ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
@@ -162,6 +163,27 @@ namespace backend.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
+        }
+        [AllowAnonymous]
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string keyword, [FromQuery] PaginationParams pagination)
+        {
+            var result = await _service.SearchAsync(keyword, pagination);
+            return Ok(result);
+        }
+        [AllowAnonymous]
+        [HttpGet("top-rated")]
+        public async Task<IActionResult> GetTopRated([FromQuery] int count = 10)
+        {
+            var result = await _service.GetTopRatedAsync(count);
+            return Ok(result);
+        }
+        [AllowAnonymous]
+        [HttpGet("open-now")]
+        public async Task<IActionResult> GetOpenNow([FromQuery] PaginationParams pagination)
+        {
+            var result = await _service.GetOpenNowAsync(pagination);
+            return Ok(result);
         }
     }
 }

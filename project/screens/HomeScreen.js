@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,15 +16,15 @@ import commonStyles from '../styles/common';
 import homeStyles from '../styles/home';
 import { COLORS } from '../styles/theme';
 
-import { banner } from '../data/homeData';
+import { homeHeader, banner } from '../data/homeData';
 import { resolveImage } from '../utils/imageUrl';
 
 import { getFoods } from '../services/foodService';
 import { getSystemCategories } from '../services/categoryService';
 import { getAllRestaurants } from '../services/restaurantService';
-import { fetchCurrentUser } from '../store/userSlice';
 
-import { toggleFavorite } from '../store/favoriteSlice';
+import { toggleFavorite, fetchFavoriteFoods, fetchFavoriteRestaurants } from '../store/favoriteSlice';
+import { fetchUnreadCount } from '../store/notificationSlice';
 
 const CATEGORY_ICON_MAP = {
   mains: 'silverware-fork-knife',
@@ -56,7 +56,8 @@ export default function HomeScreen({ navigation }) {
   const [restaurantLoading, setRestaurantLoading] = useState(false);
   const [foodLoading, setFoodLoading] = useState(false);
   const favoriteIds = useSelector(state => state.favorite.items);
-
+  const currentUser = useSelector(state => state.auth.user);
+  const unreadCount = useSelector(state => state.notification.unreadCount);
   // FAVORITE
 
   const handleFavorite = item => {
@@ -117,17 +118,15 @@ export default function HomeScreen({ navigation }) {
     loadCategories();
     loadRestaurants();
     loadFoods();
-  }, []);
 
-  const authUser = useSelector(state => state.auth.user);
-  const { currentUser, status, error } = useSelector(state => state.user);
-  console.log('CURRENT USER:', JSON.stringify(currentUser), 'STATUS:', status, 'ERROR:', error);
+    dispatch(fetchFavoriteFoods({ pageNumber: 1, pageSize: 100 }));
+    dispatch(fetchFavoriteRestaurants({ pageNumber: 1, pageSize: 100 }));
+  }, [dispatch]);
+
   useFocusEffect(
     useCallback(() => {
-      if (authUser?.id) {
-        dispatch(fetchCurrentUser(authUser.id));
-      }
-    }, [dispatch, authUser?.id]),
+      dispatch(fetchUnreadCount());
+    }, [dispatch])
   );
 
   return (
@@ -136,9 +135,11 @@ export default function HomeScreen({ navigation }) {
         appName="EatLocal"
         location="Binh Duong"
         avatar={resolveImage(currentUser?.avatar)}
-        onNotificationPress={() => navigation.navigate("Notifications")}
-        onProfilePress={() => navigation.navigate("Profile")}
+        unreadCount={unreadCount}
+        onNotificationPress={() => navigation.navigate('Notifications')}
+        onProfilePress={() => navigation.navigate('Profile')}
       />
+
       <ScrollView showsVerticalScrollIndicator={false} style={commonStyles.container}>
 
         <SearchBar

@@ -220,8 +220,8 @@ namespace backend.Data
                 new Notification
                 {
                     UserId = customer.Id,
-                    Title = "Đơn hàng đã được đặt",
-                    Message = $"Đơn hàng của bạn tại {firstRestaurant.Name} đã được ghi nhận và đang chờ nhà hàng xác nhận.",
+                    Title = "Order Created",
+                    Message = $"Your order at {firstRestaurant.Name} has been received and is pending restaurant confirmation.",
                     Type = NotificationType.OrderCreated,
                     RelatedEntityId = firstRestaurant.Id,
                     IsRead = false,
@@ -230,8 +230,8 @@ namespace backend.Data
                 new Notification
                 {
                     UserId = customer.Id,
-                    Title = "Đơn hàng đang được chuẩn bị",
-                    Message = $"{firstRestaurant.Name} đang chuẩn bị món ăn cho đơn hàng của bạn.",
+                    Title = "Order in Progress",
+                    Message = $"{firstRestaurant.Name} is preparing your order.",
                     Type = NotificationType.OrderStatusChanged,
                     RelatedEntityId = firstRestaurant.Id,
                     IsRead = false,
@@ -240,8 +240,8 @@ namespace backend.Data
                 new Notification
                 {
                     UserId = customer.Id,
-                    Title = "Thanh toán thành công",
-                    Message = "Chúng tôi đã nhận được thanh toán cho đơn hàng gần nhất của bạn.",
+                    Title = "Payment Completed",
+                    Message = $"We have received your payment for the most recent order at {firstRestaurant.Name}.",
                     Type = NotificationType.PaymentCompleted,
                     RelatedEntityId = null,
                     IsRead = true,
@@ -250,8 +250,8 @@ namespace backend.Data
                 new Notification
                 {
                     UserId = customer.Id,
-                    Title = "Chào mừng bạn đến với ứng dụng!",
-                    Message = "Khám phá hàng trăm món ăn ngon từ các nhà hàng yêu thích gần bạn.",
+                    Title = "Welcome to the App!",
+                    Message = "Discover hundreds of delicious dishes from your favorite restaurants near you.",
                     Type = NotificationType.System,
                     RelatedEntityId = null,
                     IsRead = true,
@@ -262,8 +262,8 @@ namespace backend.Data
                 new Notification
                 {
                     UserId = owners[0].Id,
-                    Title = "Có đơn hàng mới",
-                    Message = $"{firstRestaurant.Name} vừa nhận được 1 đơn hàng mới, vui lòng xác nhận.",
+                    Title = "New Order Received",
+                    Message = $"{firstRestaurant.Name} has received a new order, please confirm.",
                     Type = NotificationType.OrderCreated,
                     RelatedEntityId = firstRestaurant.Id,
                     IsRead = false,
@@ -272,8 +272,8 @@ namespace backend.Data
                 new Notification
                 {
                     UserId = owners[0].Id,
-                    Title = "Đánh giá mới từ khách hàng",
-                    Message = $"Một khách hàng vừa để lại đánh giá 5 sao cho món ăn tại {firstRestaurant.Name}.",
+                    Title = "New Review from Customer",
+                    Message = $"A customer has just left a 5-star review for the dish at {firstRestaurant.Name}.",
                     Type = NotificationType.NewReview,
                     RelatedEntityId = firstRestaurant.Id,
                     IsRead = false,
@@ -284,8 +284,8 @@ namespace backend.Data
                 new Notification
                 {
                     UserId = drivers[0].Id,
-                    Title = "Có đơn hàng đang chờ giao",
-                    Message = $"Đơn hàng tại {firstRestaurant.Name} đã sẵn sàng, hãy nhận đơn để bắt đầu giao hàng.",
+                    Title = "New Delivery Order",
+                    Message = $"A delivery order at {firstRestaurant.Name} is ready, please pick it up to start the delivery.",
                     Type = NotificationType.OrderStatusChanged,
                     RelatedEntityId = firstRestaurant.Id,
                     IsRead = false,
@@ -294,8 +294,8 @@ namespace backend.Data
                 new Notification
                 {
                     UserId = drivers[0].Id,
-                    Title = "Chào mừng tài xế mới!",
-                    Message = "Bật trạng thái 'Sẵn sàng nhận đơn' để bắt đầu nhận đơn giao hàng.",
+                    Title = "Welcome, New Driver!",
+                    Message = "Please set your status to 'Ready to Accept Orders' to start receiving delivery requests.",
                     Type = NotificationType.System,
                     RelatedEntityId = null,
                     IsRead = true,

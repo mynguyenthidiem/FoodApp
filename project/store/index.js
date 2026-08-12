@@ -10,6 +10,7 @@ import restaurantReducer from './restaurantSlice';
 import reviewReducer from './reviewSlice';
 import authReducer from './authSlice';
 import paymentReducer from './paymentSlice';
+import notificationReducer from './notificationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -23,5 +24,6 @@ export const store = configureStore({
     restaurant: restaurantReducer,
     review: reviewReducer,
     payment: paymentReducer,
+    notification: notificationReducer,
   },
 });

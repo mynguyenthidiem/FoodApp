@@ -5,7 +5,7 @@ import homeStyles from "../styles/home";
 
 export default function SectionHeader({
   title,
-  buttonText = "See All",
+  buttonText,
   onPress,
 }) {
   return (

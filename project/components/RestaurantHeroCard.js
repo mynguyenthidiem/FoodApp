@@ -14,7 +14,9 @@ import RestaurantActionBar from "./RestaurantActionBar";
 import { resolveImage } from "../utils/imageUrl";
 export default function RestaurantHeroCard({
   restaurant,
+  favorite,
   onBackPress,
+  onFavoritePress,
 }) {
   const formatTime = (time) => time?.slice(0, 5);
   return (
@@ -24,10 +26,10 @@ export default function RestaurantHeroCard({
         style={restaurantStyles.heroImage}
       />
       <RestaurantActionBar
-        favorite={restaurant.favorite}
+        favorite={favorite}
         onBackPress={onBackPress}
         onSharePress={() => { }}
-        onFavoritePress={() => { }}
+        onFavoritePress={onFavoritePress}
       />
 
       <View style={restaurantStyles.heroContent}>

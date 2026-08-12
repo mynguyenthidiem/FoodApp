@@ -173,12 +173,11 @@ export default function CartScreen({ navigation }) {
           <>
             <SectionHeader
               title="Your Basket"
-              subtitle="Review your order before checkout."
             />
 
             {restaurant && (
-              <View style={restaurantStyles.restaurantCard}>
-                <View style={restaurantStyles.restaurantRow}>
+              <View style={restaurantStyles.contentContainer}>
+                <View style={restaurantStyles.restaurantMetaRow}>
                   <MaterialCommunityIcons
                     name="storefront-outline"
                     size={20}
