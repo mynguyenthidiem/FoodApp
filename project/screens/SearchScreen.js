@@ -13,7 +13,12 @@ import FoodCard from '../components/FoodCard';
 
 import { useDispatch, useSelector } from 'react-redux';
 
-import { fetchRestaurants } from '../store/restaurantSlice';
+import {
+  fetchRestaurants,
+  searchRestaurantsAsync,
+  fetchTopRatedRestaurants,
+  fetchOpenNowRestaurants,
+} from '../store/restaurantSlice';
 import {
   fetchFoods,
   fetchSearchFoods,
@@ -30,10 +35,11 @@ export default function SearchScreen({ navigation }) {
 
   const {
     items: restaurants,
+    topRatedItems,
+    openNowItems,
     status: restaurantStatus,
     error: restaurantError,
   } = useSelector(state => state.restaurant);
-
   const {
     items: foods,
     searchResults,
@@ -46,52 +52,30 @@ export default function SearchScreen({ navigation }) {
     dispatch(toggleFavorite(item.id));
   };
 
+  const displayedRestaurants = useMemo(() => {
+    if (selectedFilter === 'Top Rated') {
+      return topRatedItems;
+    }
+
+    if (selectedFilter === 'Open') {
+      return openNowItems;
+    }
+
+    return restaurants;
+  }, [
+    selectedFilter,
+    restaurants,
+    topRatedItems,
+    openNowItems,
+  ]);
   const suggestedRestaurants = useMemo(
-    () => restaurants.slice(0, 3),
-    [restaurants],
+    () => displayedRestaurants.slice(0, 3),
+    [displayedRestaurants],
   );
 
   const suggestedFoods = useMemo(() => foods.slice(0, 8), [foods]);
 
-  const filteredRestaurants = useMemo(() => {
-    let data = [...restaurants];
-
-    if (keyword.trim()) {
-      const search = keyword.toLowerCase();
-
-      data = data.filter(restaurant => {
-        const categories = restaurant.categories ?? [];
-        return (
-          restaurant.name?.toLowerCase().includes(search) ||
-          restaurant.address?.toLowerCase().includes(search) ||
-          restaurant.description?.toLowerCase().includes(search) ||
-          categories.some(category => category.toLowerCase().includes(search))
-        );
-      });
-    }
-
-    switch (selectedFilter) {
-      case 'Top Rated':
-        data = data.filter(restaurant => restaurant.rating >= 4.5);
-        break;
-
-      case 'Open':
-        data = data.filter(restaurant => restaurant.isActive);
-        break;
-      default:
-        break;
-    }
-
-    return data;
-  }, [restaurants, keyword, selectedFilter]);
-
   useEffect(() => {
-    dispatch(
-      fetchRestaurants({
-        pageNumber: 1,
-        pageSize: 20,
-      }),
-    );
     dispatch(
       fetchFoods({
         pageNumber: 1,
@@ -102,11 +86,14 @@ export default function SearchScreen({ navigation }) {
 
   useEffect(() => {
     const text = keyword.trim();
+
     if (!text) {
       dispatch(clearSearchResults());
       return;
     }
+
     const timer = setTimeout(() => {
+      // Search Foods - Backend
       dispatch(
         fetchSearchFoods({
           keyword: text,
@@ -114,9 +101,47 @@ export default function SearchScreen({ navigation }) {
           pageSize: 20,
         }),
       );
+
+      // Search Restaurants - Backend
+      dispatch(
+        searchRestaurantsAsync({
+          keyword: text,
+          pageNumber: 1,
+          pageSize: 20,
+        }),
+      );
     }, 400);
+
     return () => clearTimeout(timer);
   }, [dispatch, keyword]);
+
+  useEffect(() => {
+    if (keyword.trim()) {
+      return;
+    }
+
+    if (selectedFilter === 'All') {
+      dispatch(
+        fetchRestaurants({
+          pageNumber: 1,
+          pageSize: 20,
+        }),
+      );
+    }
+
+    if (selectedFilter === 'Top Rated') {
+      dispatch(fetchTopRatedRestaurants(10));
+    }
+
+    if (selectedFilter === 'Open') {
+      dispatch(
+        fetchOpenNowRestaurants({
+          pageNumber: 1,
+          pageSize: 20,
+        }),
+      );
+    }
+  }, [dispatch, selectedFilter, keyword]);
 
   if (
     (restaurantStatus === 'loading' && restaurants.length === 0) ||
@@ -238,12 +263,12 @@ export default function SearchScreen({ navigation }) {
               Restaurants
             </Text>
 
-            {filteredRestaurants.length === 0 ? (
+            {restaurants.length === 0 ? (
               <Text style={homeStyles.emptySearchText}>
                 No restaurants found.
               </Text>
             ) : (
-              filteredRestaurants.map(restaurant => (
+              restaurants.map(restaurant => (
                 <RestaurantCard
                   key={restaurant.id}
                   image={restaurant.imageUrl}

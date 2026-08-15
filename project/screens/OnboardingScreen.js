@@ -10,11 +10,19 @@ import onboardingData from '../data/onboardingData';
 import OnboardingCard from '../components/OnboardingCard';
 import CustomButton from '../components/CustomButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-export default function OnboardingScreen({ navigation }) {
+import { getToken } from '../utils/tokenStorage';
+export default function OnboardingScreen({ navigation, route }) {
+    const { userId } = route.params;
+
     const [currentPage, setCurrentPage] = useState(0);
     const page = onboardingData[currentPage];
+
     const finishOnboarding = async () => {
-        await AsyncStorage.setItem('has_seen_onboarding', 'true');
+        await AsyncStorage.setItem(
+            `has_seen_onboarding_${userId}`,
+            'true'
+        );
+
         navigation.replace('MainTabs');
     };
     return (

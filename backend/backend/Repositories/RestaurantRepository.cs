@@ -53,21 +53,38 @@ namespace backend.Repositories
             _context.Restaurants.Add(restaurant);
             await _context.SaveChangesAsync();
         }
-        public async Task<(List<Restaurant>, int)> SearchAsync(string keyword, int pageNumber, int pageSize)
+        public async Task<(List<Restaurant>, int)> SearchAsync(
+    string keyword,
+    int pageNumber,
+    int pageSize)
         {
+            keyword = keyword.Trim();
+
             var baseQuery = _context.Restaurants
-                .Where(r => r.IsActive &&
-                    (r.Name.Contains(keyword) || r.Address.Contains(keyword)));
+                .Where(r =>
+                    r.IsActive &&
+                    (
+                        r.Name.Contains(keyword) ||
+                        r.Address.Contains(keyword) ||
+                        r.Description.Contains(keyword) ||
+
+                        r.Foods.Any(f =>
+                            f.Status == FoodStatus.Available &&
+                            f.Name.Contains(keyword))
+                    ));
 
             var totalCount = await baseQuery.CountAsync();
 
             var items = await baseQuery
-                .OrderBy(r => r.Name)
+                .OrderByDescending(r => r.Rating)
+                .ThenBy(r => r.Name)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Include(r => r.Foods)
-                .Include(r => r.Categories).ThenInclude(c => c.SystemCategory)
+                .Include(r => r.Categories)
+                    .ThenInclude(c => c.SystemCategory)
                 .AsSplitQuery()
+                .AsNoTracking()
                 .ToListAsync();
 
             return (items, totalCount);

@@ -22,6 +22,7 @@ import { resolveImage } from '../utils/imageUrl';
 import { getFoods } from '../services/foodService';
 import { getSystemCategories } from '../services/categoryService';
 import { getAllRestaurants } from '../services/restaurantService';
+import { fetchCurrentUser } from '../store/userSlice';
 
 import { toggleFavorite, fetchFavoriteFoods, fetchFavoriteRestaurants } from '../store/favoriteSlice';
 import { fetchUnreadCount } from '../store/notificationSlice';
@@ -56,7 +57,8 @@ export default function HomeScreen({ navigation }) {
   const [restaurantLoading, setRestaurantLoading] = useState(false);
   const [foodLoading, setFoodLoading] = useState(false);
   const favoriteIds = useSelector(state => state.favorite.items);
-  const currentUser = useSelector(state => state.auth.user);
+  const authUser = useSelector(state => state.auth.user);
+  const currentUser = useSelector(state => state.user.currentUser);
   const unreadCount = useSelector(state => state.notification.unreadCount);
   // FAVORITE
 
@@ -121,12 +123,20 @@ export default function HomeScreen({ navigation }) {
 
     dispatch(fetchFavoriteFoods({ pageNumber: 1, pageSize: 100 }));
     dispatch(fetchFavoriteRestaurants({ pageNumber: 1, pageSize: 100 }));
-  }, [dispatch]);
+
+    if (authUser?.id) {
+      dispatch(fetchCurrentUser(authUser.id));
+    }
+  }, [dispatch, authUser?.id]);
 
   useFocusEffect(
     useCallback(() => {
       dispatch(fetchUnreadCount());
-    }, [dispatch])
+
+      if (authUser?.id) {
+        dispatch(fetchCurrentUser(authUser.id));
+      }
+    }, [dispatch, authUser?.id])
   );
 
   return (
