@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch, useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 
 import ProfileCard from '../components/ProfileCard';
 import SettingRow from '../components/SettingRow';
@@ -20,12 +21,13 @@ const SettingsScreen = ({ navigation }) => {
   const { user: authUser } = useSelector(state => state.auth);
   const { currentUser, status, error } = useSelector(state => state.user);
 
-  useEffect(() => {
-    if (!currentUser && authUser?.id) {
-      dispatch(fetchCurrentUser(authUser.id));
-    }
-  }, [dispatch, currentUser, authUser?.id]);
-
+  useFocusEffect(
+    useCallback(() => {
+      if (authUser?.id) {
+        dispatch(fetchCurrentUser(authUser.id));
+      }
+    }, [dispatch, authUser?.id]),
+  );
 
   if (status === 'loading' && !currentUser) {
     return (

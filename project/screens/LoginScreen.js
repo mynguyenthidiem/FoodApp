@@ -30,17 +30,29 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const handleAfterLogin = async () => {
-    const hasSeenOnboarding = await AsyncStorage.getItem(
-      'has_seen_onboarding',
-    );
+  const handleAfterLogin = async (userId) => {
+    if (!userId) {
+      console.log('USER ID NOT FOUND');
+      navigation.replace('MainTabs');
+      return;
+    }
+
+    const onboardingKey = `has_seen_onboarding_${userId}`;
+
+    const hasSeenOnboarding = await AsyncStorage.getItem(onboardingKey);
+
+    console.log('USER ID:', userId);
+    console.log('ONBOARDING:', hasSeenOnboarding);
 
     if (hasSeenOnboarding === 'true') {
       navigation.replace('MainTabs');
     } else {
-      navigation.replace('Onboard');
+      navigation.replace('Onboard', {
+        userId,
+      });
     }
   };
+
   const handleLogin = async () => {
     if (!email.trim() || !password) {
       Alert.alert('Error', 'Email and password are required.');
@@ -50,14 +62,16 @@ export default function LoginScreen({ navigation }) {
     try {
       setLoading(true);
 
-      await dispatch(
+      const result = await dispatch(
         loginUser({
           email: email.trim(),
           password,
         }),
       ).unwrap();
 
-      await handleAfterLogin();
+      console.log('LOGIN RESULT:', result);
+
+      await handleAfterLogin(result.user.id);
     } catch (err) {
       console.log('FULL LOGIN ERROR:', err);
 

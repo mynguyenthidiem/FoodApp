@@ -52,3 +52,45 @@ export const updateRestaurantStatus = async (id, data) => {
 
   return response.data;
 };
+
+// GET /api/Restaurant/search
+export const searchRestaurants = async (
+  keyword,
+  pageNumber = 1,
+  pageSize = 20
+) => {
+  const response = await api.get("/Restaurant/search", {
+    params: {
+      keyword,
+      pageNumber,
+      pageSize,
+    },
+  });
+
+  return response.data;
+};
+// GET /api/Restaurant/top-rated
+export const getTopRatedRestaurants = async (count = 10) => {
+  const response = await api.get("/Restaurant/top-rated", {
+    params: {
+      count,
+    },
+  });
+
+  return response.data;
+};
+
+// GET /api/Restaurant/open-now
+export const getOpenNowRestaurants = async (
+  pageNumber = 1,
+  pageSize = 20
+) => {
+  const response = await api.get("/Restaurant/open-now", {
+    params: {
+      pageNumber,
+      pageSize,
+    },
+  });
+
+  return response.data;
+};
